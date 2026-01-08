@@ -5,6 +5,7 @@ import NumericLabelSlider from "./LabelSlider"
 export type ControlPanelProps = {
     state: SimState
     actions: SimActions
+    updateTick: number
 }
 
 export default function ControlPanel(props: ControlPanelProps) {
@@ -13,10 +14,9 @@ export default function ControlPanel(props: ControlPanelProps) {
 
     const getCellColor = (val: number) => {
         const intensity = Math.floor(Math.abs(val) * 255);
-        const opposite = 255 - intensity;
         
-        if (val < 0) return `rgb(${opposite}, 0, 0)`;
-        if (val > 0) return `rgb(0, ${opposite}, 0)`;
+        if (val < 0) return `rgb(${intensity}, 0, 0)`;
+        if (val > 0) return `rgb(0, ${intensity}, 0)`;
         return `rgba(0, 0, 0, 1)`;
     };
 
@@ -107,7 +107,7 @@ export default function ControlPanel(props: ControlPanelProps) {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 fontSize: '10px',
-                                color: Math.abs(val) > 0.5 ? '#fff' : '#000',
+                                color:'#fff',
                                 cursor: 'pointer',
                                 userSelect: 'none',
                                 borderRadius: '2px',

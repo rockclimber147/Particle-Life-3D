@@ -16,6 +16,7 @@ export default function App() {
   const defaultParticleKinds = SIM_LIMITS.DEFAULT_KINDS;
 
   const [resetSeed, setResetSeed] = useState(0);
+  const [matrixUpdateTick, setMatrixUpdateTick] = useState(0);
 
   const sim = useRef<SimState>({
     numParticles: defaultNumParticles,
@@ -189,6 +190,7 @@ export default function App() {
     updateMatrixValueAtCoords: function (i: number, j: number, delta: number): void {
       const newVal = Math.max(-1, Math.min(1, sim.current.matrix[i][j] + delta));
       sim.current.matrix[i][j] = newVal;
+      setMatrixUpdateTick(prev => prev + 1);
     }
   }
 
@@ -206,6 +208,7 @@ export default function App() {
             key={resetSeed}
             state={sim.current} 
             actions={actions} 
+            updateTick={matrixUpdateTick}
         />
       </div>
 
