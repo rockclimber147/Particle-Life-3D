@@ -1,16 +1,24 @@
 import type { SimState, SimActions } from "../types/Sim"
 import { SIM_LIMITS } from "../constants/SimConstants"
 import NumericLabelSlider from "./LabelSlider"
+import MatrixManipulator from "./MatrixManipulator"
+import { useState } from "react"
 
 export type ControlPanelProps = {
     state: SimState
     actions: SimActions
-    updateTick: number
 }
 
 export default function ControlPanel(props: ControlPanelProps) {
+    const [ _, setTick] = useState(0);
+    
     const actions = props.actions;
     const sim = props.state;
+
+    const handleUpdate = (i: number, j: number, delta: number) => {
+        actions.updateMatrixValueAtCoords(i, j, delta);
+        setTick(t => t + 1);
+    };
 
     const getCellColor = (val: number) => {
         const intensity = Math.floor(Math.abs(val) * 255);
@@ -62,64 +70,12 @@ export default function ControlPanel(props: ControlPanelProps) {
             <button style={{ flex: 1, padding: '8px' }} onClick={actions.randomizeRules}>Randomize Rules</button>
         </div>
 
-        <div style={{
-            display: 'grid',
-            gridTemplateColumns: `repeat(${sim.particleKinds + 1}, 1fr)`,
-            gap: '2px',
-            width: '100%',
-            marginTop: '10px',
-            backgroundColor: '#000000',
-            padding: '2px',
-            borderRadius: '4px'
-        }}>
-            <div style={{ aspectRatio: '1 / 1' }} /> 
-
-            {Array.from({ length: sim.particleKinds }).map((_, i) => (
-                <div key={`h-${i}`} style={{ 
-                    backgroundColor: `hsl(${360 * (i / sim.particleKinds)}, 100%, 50%)`, 
-                    aspectRatio: '1 / 1',
-                    borderRadius: '2px'
-                }} />
-            ))}
-
-            {sim.matrix.map((row, i) => (
-                <div key={`row-group-${i}`} style={{ display: 'contents' }}> 
-                    {/* Left Header Cell (Row label) */}
-                    <div style={{ 
-                        backgroundColor: `hsl(${360 * (i / sim.particleKinds)}, 100%, 50%)`, 
-                        aspectRatio: '1 / 1',
-                        borderRadius: '2px'
-                    }} />
-                    
-                    {/* Data Cells */}
-                    {row.map((val, j) => (
-                        <div 
-                            key={`${i}-${j}`} 
-                            onContextMenu={(e) => {
-                                e.preventDefault();
-                                actions.updateMatrixValueAtCoords(i, j, -0.1); 
-                            }}
-                            onClick={() => actions.updateMatrixValueAtCoords(i, j, 0.1)}
-                            style={{
-                                backgroundColor: getCellColor(val),
-                                aspectRatio: '1 / 1',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '10px',
-                                color:'#fff',
-                                cursor: 'pointer',
-                                userSelect: 'none',
-                                borderRadius: '2px',
-                                fontWeight: 'bold'
-                            }}
-                        >
-                            {val.toFixed(1)}
-                        </div>
-                    ))}
-                </div>
-            ))}
-        </div>
+        <MatrixManipulator 
+                matrix={sim.matrix}
+                particleKinds={sim.particleKinds}
+                updateMatrixValueAtCoords={handleUpdate}
+                getCellColor={getCellColor}
+            />
         </>
     )
 }
