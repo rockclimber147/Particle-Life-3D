@@ -45,8 +45,6 @@ export default function App() {
 
   const resetParticles = () => {
     const s = sim.current;
-    console.log("Resetting with")
-    console.log(s.numParticles)
     for (let i = 0; i < s.numParticles; i++) {
       s.colors[i] = Math.floor(Math.random() * s.particleKinds);
       s.positionsX[i] = Math.random();
