@@ -6,19 +6,20 @@ export default function App() {
   const maxNumParticles = 5000;
   const DefaultumParticles = 1000;
   const timeStep = 0.01;
-  const frictionHalfLife = 0.080;
-  const frictionFactor = Math.pow(0.5, timeStep / frictionHalfLife)
+  const defaultFrictionHalfLife = 0.080;
   const forceFactor = 10;
   const rMax = 0.4;
   const m = 5;
 
-  const [numParticles, setNumParticles] = useState(forceFactor);
+  const [numParticles, setNumParticles] = useState(DefaultumParticles);
   const [uiForce, setUiForce] = useState(forceFactor);
   const [uiRMax, setUiRMax] = useState(rMax);
+  const [frictionHalfLife, setFrictionHalfLife] = useState(defaultFrictionHalfLife);
 
   const sim = useRef({
     numParticles: DefaultumParticles,
     forceFactor: forceFactor,
+    frictionFactor: Math.pow(0.5, timeStep / defaultFrictionHalfLife),
     rMax: rMax,
     colors: new Int32Array(maxNumParticles),
     positionsX: new Float32Array(maxNumParticles),
@@ -60,6 +61,12 @@ export default function App() {
     const val = parseFloat(e.target.value);
     setUiRMax(val);
     sim.current.rMax = val;
+  };
+
+  const handleFrictionHalfLifeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseFloat(e.target.value);
+    setFrictionHalfLife(val);
+    sim.current.frictionFactor = Math.pow(0.5, timeStep / val);
   };
 
   const resetParticles = () => {
@@ -130,9 +137,9 @@ export default function App() {
       totalForceY *= s.rMax * s.forceFactor;
       totalForceZ *= s.rMax * s.forceFactor;
 
-      s.velocitiesX[i] *= frictionFactor;
-      s.velocitiesY[i] *= frictionFactor;
-      s.velocitiesZ[i] *= frictionFactor;
+      s.velocitiesX[i] *= s.frictionFactor;
+      s.velocitiesY[i] *= s.frictionFactor;
+      s.velocitiesZ[i] *= s.frictionFactor;
 
       s.velocitiesX[i] += totalForceX * timeStep;
       s.velocitiesY[i] += totalForceY * timeStep;
@@ -219,6 +226,14 @@ export default function App() {
           <input 
             type="range" min="0.01" max="1.0" step="0.01" 
             value={uiRMax} onChange={handleRMaxChange} 
+          />
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <label>Friction Half Life: {frictionHalfLife.toFixed(2)}</label>
+          <input 
+            type="range" min="0.01" max="1.0" step="0.01" 
+            value={frictionHalfLife} onChange={handleFrictionHalfLifeChange} 
           />
         </div>
 
