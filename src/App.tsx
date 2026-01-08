@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const numParticles = 1000;
+  const maxNumParticles = 5000;
+  const DefaultumParticles = 1000;
   const timeStep = 0.01;
   const frictionHalfLife = 0.080;
   const frictionFactor = Math.pow(0.5, timeStep / frictionHalfLife)
@@ -11,14 +12,21 @@ export default function App() {
   const rMax = 0.4;
   const m = 5;
 
+  const [numParticles, setNumParticles] = useState(forceFactor);
+  const [uiForce, setUiForce] = useState(forceFactor);
+  const [uiRMax, setUiRMax] = useState(rMax);
+
   const sim = useRef({
-    colors: new Int32Array(numParticles),
-    positionsX: new Float32Array(numParticles),
-    positionsY: new Float32Array(numParticles),
-    positionsZ: new Float32Array(numParticles),
-    velocitiesX: new Float32Array(numParticles),
-    velocitiesY: new Float32Array(numParticles),
-    velocitiesZ: new Float32Array(numParticles),
+    numParticles: DefaultumParticles,
+    forceFactor: forceFactor,
+    rMax: rMax,
+    colors: new Int32Array(maxNumParticles),
+    positionsX: new Float32Array(maxNumParticles),
+    positionsY: new Float32Array(maxNumParticles),
+    positionsZ: new Float32Array(maxNumParticles),
+    velocitiesX: new Float32Array(maxNumParticles),
+    velocitiesY: new Float32Array(maxNumParticles),
+    velocitiesZ: new Float32Array(maxNumParticles),
     matrix: makeRandomMatrix()
   });
 
@@ -35,9 +43,28 @@ export default function App() {
     return rows;
   }
 
+  const handleNumParticleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseFloat(e.target.value);
+    setNumParticles(val);
+    sim.current.numParticles = val;
+    resetParticles()
+  };
+
+  const handleForceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseFloat(e.target.value);
+    setUiForce(val);
+    sim.current.forceFactor = val;
+  };
+
+  const handleRMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseFloat(e.target.value);
+    setUiRMax(val);
+    sim.current.rMax = val;
+  };
+
   const resetParticles = () => {
     const s = sim.current
-    for (let i = 0; i < numParticles; i++) {
+    for (let i = 0; i < s.numParticles; i++) {
       s.colors[i] = Math.floor(Math.random() * m)
       s.positionsX[i] = Math.random();
       s.positionsY[i] = Math.random();
@@ -54,7 +81,7 @@ export default function App() {
 
   const updatePositions = () => {
     const s = sim.current
-    for (let i = 0; i < numParticles; i++) {
+    for (let i = 0; i < s.numParticles; i++) {
       s.positionsX[i] += s.velocitiesX[i] * timeStep;
       s.positionsY[i] += s.velocitiesY[i] * timeStep;
       s.positionsZ[i] += s.velocitiesZ[i] * timeStep;
@@ -67,12 +94,12 @@ export default function App() {
 
   const updateVelocities = () => {
     const s = sim.current
-    for (let i = 0; i < numParticles; i++) {
+    for (let i = 0; i < s.numParticles; i++) {
       let totalForceX = 0;
       let totalForceY = 0;
       let totalForceZ = 0;
 
-      for (let j = 0; j < numParticles; j++) {
+      for (let j = 0; j < s.numParticles; j++) {
         if (j === i) continue;
 
         let rx = s.positionsX[j] - s.positionsX[i];
@@ -90,8 +117,8 @@ export default function App() {
 
         const r = Math.sqrt(rx * rx + ry * ry + rz * rz);
 
-        if (r > 0 && r < rMax) {
-          const f = force(r / rMax, s.matrix[s.colors[i]][s.colors[j]]);
+        if (r > 0 && r < s.rMax) {
+          const f = force(r / s.rMax, s.matrix[s.colors[i]][s.colors[j]]);
           
           totalForceX += (rx / r) * f;
           totalForceY += (ry / r) * f;
@@ -99,9 +126,9 @@ export default function App() {
         }
       }
 
-      totalForceX *= rMax * forceFactor;
-      totalForceY *= rMax * forceFactor;
-      totalForceZ *= rMax * forceFactor;
+      totalForceX *= s.rMax * s.forceFactor;
+      totalForceY *= s.rMax * s.forceFactor;
+      totalForceZ *= s.rMax * s.forceFactor;
 
       s.velocitiesX[i] *= frictionFactor;
       s.velocitiesY[i] *= frictionFactor;
@@ -138,7 +165,7 @@ export default function App() {
       ctx.fillStyle = 'black';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      for (let i = 0; i < numParticles; i++) {
+      for (let i = 0; i < s.numParticles; i++) {
         const pX = s.positionsX[i] - 0.5;
         const pY = s.positionsY[i] - 0.5;
         const pZ = s.positionsZ[i] - 0.5;
@@ -162,23 +189,44 @@ export default function App() {
   }, []);
 
   return (
-  <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
-    {/* Sidebar UI */}
-    <div style={{ 
-      position: 'absolute', top: 10, left: 10, zIndex: 10,
-      background: 'rgba(0,0,0,0.7)', padding: '15px', borderRadius: '8px',
-      color: 'white', display: 'flex', flexDirection: 'column', gap: '10px' 
-    }}>
-      <h3 style={{ margin: 0 }}>Controls</h3>
-      <button onClick={resetParticles}>Reset Particles</button>
-      <button onClick={resetMatrix}>Randomize Rules</button>
-    </div>
+    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ 
+        position: 'absolute', top: 10, left: 10, zIndex: 10,
+        background: 'rgba(0,0,0,0.8)', padding: '20px', borderRadius: '8px',
+        color: 'white', display: 'flex', flexDirection: 'column', gap: '15px',
+        width: '250px', fontFamily: 'sans-serif'
+      }}>
+        <h3 style={{ margin: 0 }}>Particle Life 3D</h3>
+        
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <label>Total Particles: {numParticles}</label>
+          <input 
+            type="range" min="1" max="5000" step="1" 
+            value={numParticles} onChange={handleNumParticleChange} 
+          />
+        </div>
 
-    {/* The Canvas */}
-    <canvas 
-      ref={canvasRef} 
-      style={{ display: 'block' }}
-    />
-  </div>
-);
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <label>Force Factor: {uiForce.toFixed(1)}</label>
+          <input 
+            type="range" min="1" max="50" step="0.5" 
+            value={uiForce} onChange={handleForceChange} 
+          />
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <label>Interaction Radius (rMax): {uiRMax.toFixed(2)}</label>
+          <input 
+            type="range" min="0.01" max="1.0" step="0.01" 
+            value={uiRMax} onChange={handleRMaxChange} 
+          />
+        </div>
+
+        <button onClick={resetParticles} style={{ marginTop: '10px' }}>Reset Particles</button>
+        <button onClick={resetMatrix}>Randomize Rules</button>
+      </div>
+
+      <canvas ref={canvasRef} style={{ display: 'block', background: 'black' }} />
+    </div>
+  );
 }
