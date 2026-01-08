@@ -165,7 +165,7 @@ export default function App() {
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
       <div style={{
         position: 'absolute', top: 10, left: 10, zIndex: 10,
-        background: 'rgba(0,0,0,0.85)', padding: '20px', borderRadius: '8px',
+        background: 'rgba(0, 0, 0, 0)', padding: '20px', borderRadius: '8px',
         color: 'white', display: 'flex', flexDirection: 'column', gap: '15px',
         width: '260px', fontFamily: 'sans-serif', fontSize: '14px'
       }}>
