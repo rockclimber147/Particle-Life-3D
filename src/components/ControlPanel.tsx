@@ -1,0 +1,56 @@
+import type { SimState, SimActions } from "../types/Sim"
+import { SIM_LIMITS } from "../constants/SimConstants"
+import NumericLabelSlider from "./LabelSlider"
+
+export type ControlPanelProps = {
+    state: SimState
+    actions: SimActions
+}
+
+export default function ControlPanel(props: ControlPanelProps) {
+    const actions = props.actions;
+    const sim = props.state;
+    return (
+        <>
+        <NumericLabelSlider
+                  title="Particle Kinds"
+                  initialValue={sim.particleKinds}
+                  min={SIM_LIMITS.MIN_KINDS} max={SIM_LIMITS.MAX_KINDS} step={1}
+                  onChange={actions.updateParticleKinds}
+                />
+        
+                <NumericLabelSlider
+                  title="Total Particles"
+                  initialValue={sim.numParticles}
+                  min={SIM_LIMITS.MIN_PARTICLES} max={SIM_LIMITS.MAX_PARTICLES} step={1}
+                  onChange={actions.resetParticles}
+                />
+        
+                <NumericLabelSlider
+                  title="Force Factor"
+                  initialValue={sim.forceFactor}
+                  min={SIM_LIMITS.MIN_FORCE} max={SIM_LIMITS.MAX_FORCE} step={0.1}
+                  onChange={actions.updateForceFactor}
+                />
+        
+                <NumericLabelSlider
+                  title="Radius (rMax)"
+                  initialValue={sim.rMax}
+                  min={SIM_LIMITS.MIN_RMAX} max={SIM_LIMITS.MAX_RMAX} step={0.01}
+                  onChange={actions.updateMaxRadius}
+                />
+        
+                <NumericLabelSlider
+                  title="Friction Half-Life"
+                  initialValue={SIM_LIMITS.DEFAULT_FRICTION_HL}
+                  min={SIM_LIMITS.MIN_FRICTION_HL} max={SIM_LIMITS.MAX_FRICTION_HL} step={0.01}
+                  onChange={actions.updateFrictionHalfLife}
+                />
+        
+                <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
+                  <button style={{ flex: 1, padding: '8px' }} onClick={actions.resetParticles}>Reset Pos</button>
+                  <button style={{ flex: 1, padding: '8px' }} onClick={actions.randomizeRules}>Randomize Rules</button>
+                </div>
+        </>
+    )
+}

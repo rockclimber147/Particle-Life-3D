@@ -1,22 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
-import NumericLabelSlider from './components/LabelSlider';
+import ControlPanel from './components/ControlPanel';
+import type { SimState, SimActions } from './types/Sim';
+import { SIM_LIMITS } from './constants/SimConstants';
 
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Constants
-  const maxNumParticles = 5000;
-  const defaultNumParticles = 1000;
-  const timeStep = 0.01;
-  const defaultFrictionHalfLife = 0.080;
-  const defaultForceFactor = 10;
-  const defaultRMax = 0.4;
-  const defaultParticleKinds = 5;
+  const maxNumParticles = SIM_LIMITS.MAX_PARTICLES;
+  const defaultNumParticles = SIM_LIMITS.DEFAULT_PARTICLES;
+  const timeStep = SIM_LIMITS.DEFAULT_TIME_STEP;
+  const defaultFrictionHalfLife = SIM_LIMITS.DEFAULT_FRICTION_HL;
+  const defaultForceFactor = SIM_LIMITS.DEFAULT_FORCE_FACTOR;
+  const defaultRMax = SIM_LIMITS.DEFAULT_RMAX;
+  const defaultParticleKinds = SIM_LIMITS.DEFAULT_KINDS;
 
-  // We use this 'seed' to force re-render sliders when resetMatrix is called
   const [resetSeed, setResetSeed] = useState(0);
 
-  const sim = useRef({
+  const sim = useRef<SimState>({
     numParticles: defaultNumParticles,
     particleKinds: defaultParticleKinds,
     forceFactor: defaultForceFactor,
@@ -29,7 +30,7 @@ export default function App() {
     velocitiesX: new Float32Array(maxNumParticles),
     velocitiesY: new Float32Array(maxNumParticles),
     velocitiesZ: new Float32Array(maxNumParticles),
-    matrix: [] as number[][] // Will be initialized in useEffect
+    matrix: [] as number[][]
   });
 
   function makeRandomMatrix(kinds: number): number[][] {
@@ -59,7 +60,7 @@ export default function App() {
 
   const resetMatrix = () => {
     sim.current.matrix = makeRandomMatrix(sim.current.particleKinds);
-    setResetSeed(Math.random()); // Forces UI to refresh to current sim values
+    setResetSeed(Math.random());
   };
 
   const updatePositions = () => {
@@ -161,6 +162,33 @@ export default function App() {
     return () => cancelAnimationFrame(animationFrameId);
   }, []);
 
+  const actions: SimActions = {
+    updateParticleKinds: function (val: number): void {
+      sim.current.particleKinds = val;
+      resetMatrix();
+      resetParticles();
+    },
+    updateTotalParticles: function (val: number): void {
+      sim.current.numParticles = val;
+      resetParticles()
+    },
+    updateForceFactor: function (val: number): void {
+      sim.current.forceFactor = val;
+    },
+    updateMaxRadius: function (val: number): void {
+      sim.current.rMax = val;
+    },
+    updateFrictionHalfLife: function (val: number): void {
+      sim.current.frictionFactor = Math.pow(0.5, timeStep / val);
+    },
+    randomizeRules: function (): void {
+      resetMatrix();
+    },
+    resetParticles: function (): void {
+      resetParticles();
+    }
+  }
+
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
       <div style={{
@@ -171,59 +199,11 @@ export default function App() {
       }}>
         <h3 style={{ margin: '0 0 5px 0' }}>Particle Life 3D</h3>
 
-        <NumericLabelSlider
-          key={`kinds-${resetSeed}`}
-          title="Particle Kinds"
-          initialValue={sim.current.particleKinds}
-          min={1} max={10} step={1}
-          onChange={(v) => {
-            sim.current.particleKinds = v;
-            resetMatrix();
-            resetParticles();
-          }}
+        <ControlPanel 
+            key={resetSeed}
+            state={sim.current} 
+            actions={actions} 
         />
-
-        <NumericLabelSlider
-          key={`count-${resetSeed}`}
-          title="Total Particles"
-          initialValue={sim.current.numParticles}
-          min={1} max={maxNumParticles} step={1}
-          onChange={(v) => {
-            sim.current.numParticles = v;
-            resetParticles();
-          }}
-        />
-
-        <NumericLabelSlider
-          key={`force-${resetSeed}`}
-          title="Force Factor"
-          initialValue={sim.current.forceFactor}
-          min={0} max={20} step={0.1}
-          onChange={(v) => sim.current.forceFactor = v}
-        />
-
-        <NumericLabelSlider
-          key={`rmax-${resetSeed}`}
-          title="Radius (rMax)"
-          initialValue={sim.current.rMax}
-          min={0.01} max={1.0} step={0.01}
-          onChange={(v) => sim.current.rMax = v}
-        />
-
-        <NumericLabelSlider
-          key={`friction-${resetSeed}`}
-          title="Friction Half-Life"
-          initialValue={defaultFrictionHalfLife}
-          min={0.01} max={0.5} step={0.01}
-          onChange={(v) => {
-            sim.current.frictionFactor = Math.pow(0.5, timeStep / v);
-          }}
-        />
-
-        <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
-          <button style={{ flex: 1, padding: '8px' }} onClick={resetParticles}>Reset Pos</button>
-          <button style={{ flex: 1, padding: '8px' }} onClick={resetMatrix}>New Rules</button>
-        </div>
       </div>
 
       <canvas ref={canvasRef} style={{ display: 'block', background: 'black' }} />
