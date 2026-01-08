@@ -9,15 +9,17 @@ export default function App() {
   const defaultFrictionHalfLife = 0.080;
   const forceFactor = 10;
   const rMax = 0.4;
-  const m = 5;
+  const defaultParticleKinds = 5;
 
   const [numParticles, setNumParticles] = useState(DefaultumParticles);
+  const [particleKinds, setParticleKinds] = useState(defaultParticleKinds);
   const [uiForce, setUiForce] = useState(forceFactor);
   const [uiRMax, setUiRMax] = useState(rMax);
   const [frictionHalfLife, setFrictionHalfLife] = useState(defaultFrictionHalfLife);
 
   const sim = useRef({
     numParticles: DefaultumParticles,
+    particleKinds: defaultParticleKinds,
     forceFactor: forceFactor,
     frictionFactor: Math.pow(0.5, timeStep / defaultFrictionHalfLife),
     rMax: rMax,
@@ -28,15 +30,15 @@ export default function App() {
     velocitiesX: new Float32Array(maxNumParticles),
     velocitiesY: new Float32Array(maxNumParticles),
     velocitiesZ: new Float32Array(maxNumParticles),
-    matrix: makeRandomMatrix()
+    matrix: makeRandomMatrix(defaultParticleKinds)
   });
 
 
-  function makeRandomMatrix(): number[][] {
+  function makeRandomMatrix(particleKinds: number): number[][] {
     const rows: number[][] = [];
-    for (let i = 0; i < m; i++) {
+    for (let i = 0; i < particleKinds; i++) {
       const row: number [] = [];
-      for (let j = 0; j < m; j++) {
+      for (let j = 0; j < particleKinds; j++) {
         row.push(Math.random() * 2 - 1);
       }
       rows.push(row)
@@ -48,6 +50,14 @@ export default function App() {
     const val = parseFloat(e.target.value);
     setNumParticles(val);
     sim.current.numParticles = val;
+    resetParticles()
+  };
+
+  const handleParticleKindChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseFloat(e.target.value);
+    setParticleKinds(val);
+    sim.current.particleKinds = val;
+    resetMatrix()
     resetParticles()
   };
 
@@ -72,7 +82,7 @@ export default function App() {
   const resetParticles = () => {
     const s = sim.current
     for (let i = 0; i < s.numParticles; i++) {
-      s.colors[i] = Math.floor(Math.random() * m)
+      s.colors[i] = Math.floor(Math.random() * s.particleKinds)
       s.positionsX[i] = Math.random();
       s.positionsY[i] = Math.random();
       s.positionsZ[i] = Math.random();
@@ -83,7 +93,7 @@ export default function App() {
   }
 
   const resetMatrix = () => {
-    sim.current.matrix = makeRandomMatrix();
+    sim.current.matrix = makeRandomMatrix(sim.current.particleKinds);
   }
 
   const updatePositions = () => {
@@ -159,6 +169,7 @@ export default function App() {
     const canvas = canvasRef.current!;
     const ctx = canvas.getContext('2d')!;
     const s = sim.current
+    resetParticles();
     let animationFrameId: number;
 
     const animate = () => {
@@ -184,7 +195,7 @@ export default function App() {
 
         ctx.beginPath();
         ctx.arc(screenX, screenY, radius, 0, 2 * Math.PI);
-        ctx.fillStyle = `hsl(${360 * (s.colors[i] / m)}, 100%, 50%)`;
+        ctx.fillStyle = `hsl(${360 * (s.colors[i] / s.particleKinds)}, 100%, 50%)`;
         ctx.fill();
       }
 
@@ -205,6 +216,14 @@ export default function App() {
       }}>
         <h3 style={{ margin: 0 }}>Particle Life 3D</h3>
         
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <label>Particle Kinds: {particleKinds}</label>
+          <input 
+            type="range" min="1" max="10" step="1" 
+            value={particleKinds} onChange={handleParticleKindChange} 
+          />
+        </div>
+
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <label>Total Particles: {numParticles}</label>
           <input 
