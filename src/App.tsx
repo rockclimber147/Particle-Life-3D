@@ -10,16 +10,17 @@ export default function App() {
   const forceFactor = 10;
   const rMax = 0.4;
   const m = 5;
-  const matrix: number[][] = makeRandomMatrix()
 
-  const colors = new Int32Array(numParticles);
-  const positionsX = new Float32Array(numParticles)
-  const positionsY = new Float32Array(numParticles)
-  const positionsZ = new Float32Array(numParticles)
-  const velocitiesX = new Float32Array(numParticles)
-  const velocitiesY = new Float32Array(numParticles)
-  const velocitiesZ = new Float32Array(numParticles)
-  initializeVelocitiesAndColors();
+  const sim = useRef({
+    colors: new Int32Array(numParticles),
+    positionsX: new Float32Array(numParticles),
+    positionsY: new Float32Array(numParticles),
+    positionsZ: new Float32Array(numParticles),
+    velocitiesX: new Float32Array(numParticles),
+    velocitiesY: new Float32Array(numParticles),
+    velocitiesZ: new Float32Array(numParticles),
+    matrix: makeRandomMatrix()
+  });
 
 
   function makeRandomMatrix(): number[][] {
@@ -34,31 +35,38 @@ export default function App() {
     return rows;
   }
 
-  function initializeVelocitiesAndColors() {
+  const resetParticles = () => {
+    const s = sim.current
     for (let i = 0; i < numParticles; i++) {
-      colors[i] = Math.floor(Math.random() * m)
-      positionsX[i] = Math.random();
-      positionsY[i] = Math.random();
-      positionsZ[i] = Math.random();
-      velocitiesX[i] = 0;
-      velocitiesY[i] = 0;
-      velocitiesZ[i] = 0;
+      s.colors[i] = Math.floor(Math.random() * m)
+      s.positionsX[i] = Math.random();
+      s.positionsY[i] = Math.random();
+      s.positionsZ[i] = Math.random();
+      s.velocitiesX[i] = 0;
+      s.velocitiesY[i] = 0;
+      s.velocitiesZ[i] = 0;
     }
   }
 
-  function updatePositions() {
-    for (let i = 0; i < numParticles; i++) {
-      positionsX[i] += velocitiesX[i] * timeStep;
-      positionsY[i] += velocitiesY[i] * timeStep;
-      positionsZ[i] += velocitiesZ[i] * timeStep;
+  const resetMatrix = () => {
+    sim.current.matrix = makeRandomMatrix();
+  }
 
-      positionsX[i] = ((positionsX[i] % 1) + 1) % 1;
-      positionsY[i] = ((positionsY[i] % 1) + 1) % 1;
-      positionsZ[i] = ((positionsZ[i] % 1) + 1) % 1;
+  const updatePositions = () => {
+    const s = sim.current
+    for (let i = 0; i < numParticles; i++) {
+      s.positionsX[i] += s.velocitiesX[i] * timeStep;
+      s.positionsY[i] += s.velocitiesY[i] * timeStep;
+      s.positionsZ[i] += s.velocitiesZ[i] * timeStep;
+
+      s.positionsX[i] = ((s.positionsX[i] % 1) + 1) % 1;
+      s.positionsY[i] = ((s.positionsY[i] % 1) + 1) % 1;
+      s.positionsZ[i] = ((s.positionsZ[i] % 1) + 1) % 1;
     }
   }
 
-  function updateVelocities() {
+  const updateVelocities = () => {
+    const s = sim.current
     for (let i = 0; i < numParticles; i++) {
       let totalForceX = 0;
       let totalForceY = 0;
@@ -67,9 +75,9 @@ export default function App() {
       for (let j = 0; j < numParticles; j++) {
         if (j === i) continue;
 
-        let rx = positionsX[j] - positionsX[i];
-        let ry = positionsY[j] - positionsY[i];
-        let rz = positionsZ[j] - positionsZ[i];
+        let rx = s.positionsX[j] - s.positionsX[i];
+        let ry = s.positionsY[j] - s.positionsY[i];
+        let rz = s.positionsZ[j] - s.positionsZ[i];
 
         if (rx > 0.5) rx -= 1.0;
         else if (rx < -0.5) rx += 1.0;
@@ -83,7 +91,7 @@ export default function App() {
         const r = Math.sqrt(rx * rx + ry * ry + rz * rz);
 
         if (r > 0 && r < rMax) {
-          const f = force(r / rMax, matrix[colors[i]][colors[j]]);
+          const f = force(r / rMax, s.matrix[s.colors[i]][s.colors[j]]);
           
           totalForceX += (rx / r) * f;
           totalForceY += (ry / r) * f;
@@ -95,13 +103,13 @@ export default function App() {
       totalForceY *= rMax * forceFactor;
       totalForceZ *= rMax * forceFactor;
 
-      velocitiesX[i] *= frictionFactor;
-      velocitiesY[i] *= frictionFactor;
-      velocitiesZ[i] *= frictionFactor;
+      s.velocitiesX[i] *= frictionFactor;
+      s.velocitiesY[i] *= frictionFactor;
+      s.velocitiesZ[i] *= frictionFactor;
 
-      velocitiesX[i] += totalForceX * timeStep;
-      velocitiesY[i] += totalForceY * timeStep;
-      velocitiesZ[i] += totalForceZ * timeStep;
+      s.velocitiesX[i] += totalForceX * timeStep;
+      s.velocitiesY[i] += totalForceY * timeStep;
+      s.velocitiesZ[i] += totalForceZ * timeStep;
     }
   }
 
@@ -116,6 +124,7 @@ export default function App() {
   useEffect(() => {
     const canvas = canvasRef.current!;
     const ctx = canvas.getContext('2d')!;
+    const s = sim.current
     let animationFrameId: number;
 
     const animate = () => {
@@ -130,9 +139,9 @@ export default function App() {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       for (let i = 0; i < numParticles; i++) {
-        const pX = positionsX[i] - 0.5;
-        const pY = positionsY[i] - 0.5;
-        const pZ = positionsZ[i] - 0.5;
+        const pX = s.positionsX[i] - 0.5;
+        const pY = s.positionsY[i] - 0.5;
+        const pZ = s.positionsZ[i] - 0.5;
 
         const f = 1 / (pZ + 3);
         const screenX = (pX * f * 3 + 0.5) * canvas.width;
@@ -141,7 +150,7 @@ export default function App() {
 
         ctx.beginPath();
         ctx.arc(screenX, screenY, radius, 0, 2 * Math.PI);
-        ctx.fillStyle = `hsl(${360 * (colors[i] / m)}, 100%, 50%)`;
+        ctx.fillStyle = `hsl(${360 * (s.colors[i] / m)}, 100%, 50%)`;
         ctx.fill();
       }
 
@@ -152,5 +161,24 @@ export default function App() {
     return () => cancelAnimationFrame(animationFrameId);
   }, []);
 
-  return <canvas ref={canvasRef} width={window.innerWidth} height={window.innerHeight} />;
+  return (
+  <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+    {/* Sidebar UI */}
+    <div style={{ 
+      position: 'absolute', top: 10, left: 10, zIndex: 10,
+      background: 'rgba(0,0,0,0.7)', padding: '15px', borderRadius: '8px',
+      color: 'white', display: 'flex', flexDirection: 'column', gap: '10px' 
+    }}>
+      <h3 style={{ margin: 0 }}>Controls</h3>
+      <button onClick={resetParticles}>Reset Particles</button>
+      <button onClick={resetMatrix}>Randomize Rules</button>
+    </div>
+
+    {/* The Canvas */}
+    <canvas 
+      ref={canvasRef} 
+      style={{ display: 'block' }}
+    />
+  </div>
+);
 }
