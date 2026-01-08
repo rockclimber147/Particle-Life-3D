@@ -169,7 +169,7 @@ export default function App() {
     },
     updateTotalParticles: function (val: number): void {
       sim.current.numParticles = val;
-      resetParticles()
+      resetParticles();
     },
     updateForceFactor: function (val: number): void {
       sim.current.forceFactor = val;
@@ -185,6 +185,10 @@ export default function App() {
     },
     resetParticles: function (): void {
       resetParticles();
+    },
+    updateMatrixValueAtCoords: function (i: number, j: number, delta: number): void {
+      const newVal = Math.max(-1, Math.min(1, sim.current.matrix[i][j] + delta));
+      sim.current.matrix[i][j] = newVal;
     }
   }
 

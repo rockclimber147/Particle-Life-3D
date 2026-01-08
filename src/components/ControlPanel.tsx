@@ -15,8 +15,8 @@ export default function ControlPanel(props: ControlPanelProps) {
         const intensity = Math.floor(Math.abs(val) * 255);
         const opposite = 255 - intensity;
         
-        if (val > 0) return `rgb(${opposite}, 0, 0)`;
-        if (val < 0) return `rgb(0, ${opposite}, 0)`;
+        if (val < 0) return `rgb(${opposite}, 0, 0)`;
+        if (val > 0) return `rgb(0, ${opposite}, 0)`;
         return `rgba(0, 0, 0, 1)`;
     };
 
@@ -64,24 +64,61 @@ export default function ControlPanel(props: ControlPanelProps) {
 
         <div style={{
             display: 'grid',
-            gridTemplateColumns: `repeat(${sim.particleKinds}, 1fr)`,
+            gridTemplateColumns: `repeat(${sim.particleKinds + 1}, 1fr)`,
             gap: '2px',
-            width: '100%'
+            width: '100%',
+            marginTop: '10px',
+            backgroundColor: '#000000',
+            padding: '2px',
+            borderRadius: '4px'
         }}>
-            {sim.matrix.map((row: number[], i: number) => 
-                row.map((val: number, j: number) => (
-                    <div key={`${i}-${j}`} style={{
-                        backgroundColor: getCellColor(val),
+            <div style={{ aspectRatio: '1 / 1' }} /> 
+
+            {Array.from({ length: sim.particleKinds }).map((_, i) => (
+                <div key={`h-${i}`} style={{ 
+                    backgroundColor: `hsl(${360 * (i / sim.particleKinds)}, 100%, 50%)`, 
+                    aspectRatio: '1 / 1',
+                    borderRadius: '2px'
+                }} />
+            ))}
+
+            {sim.matrix.map((row, i) => (
+                <div key={`row-group-${i}`} style={{ display: 'contents' }}> 
+                    {/* Left Header Cell (Row label) */}
+                    <div style={{ 
+                        backgroundColor: `hsl(${360 * (i / sim.particleKinds)}, 100%, 50%)`, 
                         aspectRatio: '1 / 1',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '10px'
-                    }}>
-                        {val.toFixed(1)}
-                    </div>
-                ))
-            )}
+                        borderRadius: '2px'
+                    }} />
+                    
+                    {/* Data Cells */}
+                    {row.map((val, j) => (
+                        <div 
+                            key={`${i}-${j}`} 
+                            onContextMenu={(e) => {
+                                e.preventDefault();
+                                actions.updateMatrixValueAtCoords(i, j, -0.1); 
+                            }}
+                            onClick={() => actions.updateMatrixValueAtCoords(i, j, 0.1)}
+                            style={{
+                                backgroundColor: getCellColor(val),
+                                aspectRatio: '1 / 1',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '10px',
+                                color: Math.abs(val) > 0.5 ? '#fff' : '#000',
+                                cursor: 'pointer',
+                                userSelect: 'none',
+                                borderRadius: '2px',
+                                fontWeight: 'bold'
+                            }}
+                        >
+                            {val.toFixed(1)}
+                        </div>
+                    ))}
+                </div>
+            ))}
         </div>
         </>
     )
