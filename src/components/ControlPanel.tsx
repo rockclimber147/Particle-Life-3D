@@ -41,7 +41,7 @@ export default function ControlPanel(props: ControlPanelProps) {
             title="Total Particles"
             initialValue={sim.numParticles}
             min={SIM_LIMITS.MIN_PARTICLES} max={SIM_LIMITS.MAX_PARTICLES} step={1}
-            onChange={actions.resetParticles}
+            onChange={actions.updateTotalParticles}
         />
 
         <NumericLabelSlider

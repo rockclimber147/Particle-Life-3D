@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import ControlPanel from './components/ControlPanel';
 import type { SimState, SimActions } from './types/Sim';
 import { SIM_LIMITS } from './constants/SimConstants';
@@ -14,8 +14,6 @@ export default function App() {
   const defaultForceFactor = SIM_LIMITS.DEFAULT_FORCE_FACTOR;
   const defaultRMax = SIM_LIMITS.DEFAULT_RMAX;
   const defaultParticleKinds = SIM_LIMITS.DEFAULT_KINDS;
-
-  const [resetSeed, setResetSeed] = useState(0);
 
   const sim = useRef<SimState>({
     numParticles: defaultNumParticles,
@@ -47,6 +45,8 @@ export default function App() {
 
   const resetParticles = () => {
     const s = sim.current;
+    console.log("Resetting with")
+    console.log(s.numParticles)
     for (let i = 0; i < s.numParticles; i++) {
       s.colors[i] = Math.floor(Math.random() * s.particleKinds);
       s.positionsX[i] = Math.random();
@@ -60,7 +60,6 @@ export default function App() {
 
   const resetMatrix = () => {
     sim.current.matrix = makeRandomMatrix(sim.current.particleKinds);
-    setResetSeed(Math.random());
   };
 
   const updatePositions = () => {
@@ -202,8 +201,7 @@ export default function App() {
       }}>
         <h3 style={{ margin: '0 0 5px 0' }}>Particle Life 3D</h3>
 
-        <ControlPanel 
-            key={resetSeed}
+        <ControlPanel
             state={sim.current} 
             actions={actions} 
         />
