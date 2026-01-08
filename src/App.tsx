@@ -30,7 +30,7 @@ export default function App() {
     velocitiesX: new Float32Array(maxNumParticles),
     velocitiesY: new Float32Array(maxNumParticles),
     velocitiesZ: new Float32Array(maxNumParticles),
-    matrix: [] as number[][]
+    matrix: makeRandomMatrix(defaultParticleKinds)
   });
 
   function makeRandomMatrix(kinds: number): number[][] {
@@ -121,7 +121,6 @@ export default function App() {
   }
 
   useEffect(() => {
-    sim.current.matrix = makeRandomMatrix(defaultParticleKinds);
     resetParticles();
     
     const canvas = canvasRef.current!;
