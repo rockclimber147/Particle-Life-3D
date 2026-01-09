@@ -23,5 +23,6 @@ export type SimActions = {
     updateFrictionHalfLife: (val: number) => void
     randomizeRules: () => void
     resetParticles: () => void
+    setRandomVelocities: () => void
     updateMatrixValueAtCoords: (i: number, j: number, delta: number) => void
 }

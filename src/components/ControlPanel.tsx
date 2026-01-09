@@ -86,6 +86,10 @@ export default function ControlPanel(props: ControlPanelProps) {
                 updateMatrixValueAtCoords={handleMatrixUpdate}
                 getCellColor={getCellColor}
             />
+            <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
+                <button style={{ flex: 1, padding: '8px' }} onClick={actions.setRandomVelocities}>Shake</button>
+            </div>
         </>
+        
     )
 }

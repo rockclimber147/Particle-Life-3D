@@ -183,6 +183,14 @@ export default function App() {
     resetParticles: function (): void {
       resetParticles();
     },
+    setRandomVelocities: function (): void {
+      const s = sim.current;
+      for (let i = 0; i < s.numParticles; i++) {
+        s.velocitiesX[i] = Math.random() * 10 - 5;
+        s.velocitiesY[i] = Math.random() * 10 - 5;
+        s.velocitiesZ[i] = Math.random() * 10 - 5;
+      }
+    },
     updateMatrixValueAtCoords: function (i: number, j: number, delta: number): void {
       const newVal = Math.max(-1, Math.min(1, sim.current.attractionCoefficientMatrix[i][j] + delta));
       sim.current.attractionCoefficientMatrix[i][j] = newVal;
