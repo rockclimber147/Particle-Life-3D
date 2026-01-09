@@ -141,10 +141,10 @@ export default function App() {
       updateVelocities();
       updatePositions();
 
-      if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
+      const edgeLength = Math.min(window.innerWidth, window.innerHeight)
+      canvas.width = edgeLength
+      canvas.height = edgeLength
+
       ctx.fillStyle = 'black';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
