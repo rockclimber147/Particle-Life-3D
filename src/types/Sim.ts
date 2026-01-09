@@ -4,7 +4,7 @@ export type SimState = {
     forceFactor: number;
     frictionFactor: number;
     rMax: number;
-    matrix: number[][];
+    attractionCoefficientMatrix: number[][];
 
     colors: Int32Array;
     positionsX: Float32Array;

@@ -28,7 +28,7 @@ export default function App() {
     velocitiesX: new Float32Array(maxNumParticles),
     velocitiesY: new Float32Array(maxNumParticles),
     velocitiesZ: new Float32Array(maxNumParticles),
-    matrix: makeRandomMatrix(defaultParticleKinds)
+    attractionCoefficientMatrix: makeRandomMatrix(defaultParticleKinds)
   });
 
   function makeRandomMatrix(kinds: number): number[][] {
@@ -57,7 +57,7 @@ export default function App() {
   };
 
   const resetMatrix = () => {
-    sim.current.matrix = makeRandomMatrix(sim.current.particleKinds);
+    sim.current.attractionCoefficientMatrix = makeRandomMatrix(sim.current.particleKinds);
   };
 
   const updatePositions = () => {
@@ -92,7 +92,7 @@ export default function App() {
         const r = Math.sqrt(rx * rx + ry * ry + rz * rz);
 
         if (r > 0 && r < s.rMax) {
-          const f = force(r / s.rMax, s.matrix[s.colors[i]][s.colors[j]]);
+          const f = force(r / s.rMax, s.attractionCoefficientMatrix[s.colors[i]][s.colors[j]]);
           const invR = f / r;
           totalForceX += rx * invR;
           totalForceY += ry * invR;
@@ -184,8 +184,8 @@ export default function App() {
       resetParticles();
     },
     updateMatrixValueAtCoords: function (i: number, j: number, delta: number): void {
-      const newVal = Math.max(-1, Math.min(1, sim.current.matrix[i][j] + delta));
-      sim.current.matrix[i][j] = newVal;
+      const newVal = Math.max(-1, Math.min(1, sim.current.attractionCoefficientMatrix[i][j] + delta));
+      sim.current.attractionCoefficientMatrix[i][j] = newVal;
     }
   }
 

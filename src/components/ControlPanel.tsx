@@ -81,7 +81,7 @@ export default function ControlPanel(props: ControlPanelProps) {
         </div>
 
         <MatrixManipulator 
-                matrix={sim.matrix}
+                matrix={sim.attractionCoefficientMatrix}
                 particleKinds={sim.particleKinds}
                 updateMatrixValueAtCoords={handleMatrixUpdate}
                 getCellColor={getCellColor}
