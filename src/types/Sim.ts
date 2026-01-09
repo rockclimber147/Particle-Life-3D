@@ -25,5 +25,6 @@ export type SimActions = {
     randomizeRules: () => void
     resetParticles: () => void
     setRandomVelocities: () => void
-    updateMatrixValueAtCoords: (i: number, j: number, delta: number) => void
+    updateMatrixValueAtCoords: (matrix: number[][], i: number, j: number, delta: number, min: number, max: number) => void
+    randomizeMatrix: (matrix: number[][], min: number, max: number, step: number) => void
 }

@@ -15,19 +15,19 @@ export default function ControlPanel(props: ControlPanelProps) {
     const actions = props.actions;
     const sim = props.state;
 
-    const handleMatrixUpdate = (i: number, j: number, delta: number) => {
-        actions.updateMatrixValueAtCoords(i, j, delta);
+    const handleMatrixUpdate = (matrix: number[][], i: number, j: number, delta: number, min: number, max: number) => {
+        actions.updateMatrixValueAtCoords(matrix, i, j, delta, min, max);
+        setTick(t => t + 1);
+    };
+
+    const handleMatrixRandomize = (matrix: number[][], min: number, max: number, step: number) => {
+        actions.randomizeMatrix(matrix, min, max, step);
         setTick(t => t + 1);
     };
 
     const handleParticleKindChange = (val: number) => {
         actions.updateParticleKinds(val);
         setTick(t => t + 1); 
-    };
-
-    const handleRandomize = () => {
-        actions.randomizeRules();
-        setTick(t => t + 1);
     };
 
     const getCellColor = (val: number) => {
@@ -40,6 +40,9 @@ export default function ControlPanel(props: ControlPanelProps) {
 
     return (
         <>
+        <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
+            <button style={{ flex: 1, padding: '8px' }} onClick={actions.setRandomVelocities}>Shake</button>
+        </div>
         <NumericLabelSlider
             title="Particle Kinds"
             initialValue={sim.particleKinds}
@@ -75,20 +78,29 @@ export default function ControlPanel(props: ControlPanelProps) {
             onChange={actions.updateFrictionHalfLife}
         />
 
-        <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
-            <button style={{ flex: 1, padding: '8px' }} onClick={actions.resetParticles}>Reset Pos</button>
-            <button style={{ flex: 1, padding: '8px' }} onClick={handleRandomize}>Randomize Rules</button>
-        </div>
-
         <MatrixManipulator 
+                title="Attraction Coefficients"
                 matrix={sim.attractionCoefficientMatrix}
                 particleKinds={sim.particleKinds}
                 updateMatrixValueAtCoords={handleMatrixUpdate}
+                randomizeMatrix={handleMatrixRandomize}
                 getCellColor={getCellColor}
+                min={-1}
+                max={1}
+                delta={0.1}
             />
-            <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
-                <button style={{ flex: 1, padding: '8px' }} onClick={actions.setRandomVelocities}>Shake</button>
-            </div>
+        
+        <MatrixManipulator 
+                title="Beta Coefficients"
+                matrix={sim.betaCoefficientMatrix}
+                particleKinds={sim.particleKinds}
+                updateMatrixValueAtCoords={handleMatrixUpdate}
+                randomizeMatrix={handleMatrixRandomize}
+                getCellColor={getCellColor}
+                min={0.05}
+                max={1}
+                delta={0.05}
+            />
         </>
         
     )

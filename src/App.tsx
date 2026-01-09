@@ -71,6 +71,7 @@ export default function App() {
 
   const resetMatrices = () => {
     sim.current.attractionCoefficientMatrix = makeRandomMatrix(sim.current.particleKinds);
+    sim.current.betaCoefficientMatrix = initializeBetaMatrix(sim.current.particleKinds, SIM_LIMITS.DEFAULT_BETA)
   };
 
   const updatePositions = () => {
@@ -190,7 +191,7 @@ export default function App() {
       sim.current.frictionFactor = Math.pow(0.5, timeStep / val);
     },
     randomizeRules: function (): void {
-      resetMatrices();
+      sim.current.attractionCoefficientMatrix = makeRandomMatrix(sim.current.particleKinds);
     },
     resetParticles: function (): void {
       resetParticles();
@@ -203,9 +204,17 @@ export default function App() {
         s.velocitiesZ[i] = Math.random() * 10 - 5;
       }
     },
-    updateMatrixValueAtCoords: function (i: number, j: number, delta: number): void {
-      const newVal = Math.max(-1, Math.min(1, sim.current.attractionCoefficientMatrix[i][j] + delta));
-      sim.current.attractionCoefficientMatrix[i][j] = newVal;
+    updateMatrixValueAtCoords: function (matrix: number[][], i: number, j: number, delta: number, min: number, max: number): void {
+      const newVal = Math.max(min, Math.min(max, matrix[i][j] + delta));
+      matrix[i][j] = newVal;
+    },
+    randomizeMatrix: function (matrix: number[][], min: number, max: number, step: number): void {
+      for (let i = 0; i < matrix.length; i++) {
+            for (let j = 0; j < matrix[i].length; j++) {
+                const randomVal = Math.random() * (max - min) + min;
+                matrix[i][j] = Math.round(randomVal / step) * step;
+            }
+        }
     }
   }
 
