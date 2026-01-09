@@ -15,8 +15,18 @@ export default function ControlPanel(props: ControlPanelProps) {
     const actions = props.actions;
     const sim = props.state;
 
-    const handleUpdate = (i: number, j: number, delta: number) => {
+    const handleMatrixUpdate = (i: number, j: number, delta: number) => {
         actions.updateMatrixValueAtCoords(i, j, delta);
+        setTick(t => t + 1);
+    };
+
+    const handleParticleKindChange = (val: number) => {
+        actions.updateParticleKinds(val);
+        setTick(t => t + 1); 
+    };
+
+    const handleRandomize = () => {
+        actions.randomizeRules();
         setTick(t => t + 1);
     };
 
@@ -34,7 +44,7 @@ export default function ControlPanel(props: ControlPanelProps) {
             title="Particle Kinds"
             initialValue={sim.particleKinds}
             min={SIM_LIMITS.MIN_KINDS} max={SIM_LIMITS.MAX_KINDS} step={1}
-            onChange={actions.updateParticleKinds}
+            onChange={handleParticleKindChange}
         />
 
         <NumericLabelSlider
@@ -67,13 +77,13 @@ export default function ControlPanel(props: ControlPanelProps) {
 
         <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
             <button style={{ flex: 1, padding: '8px' }} onClick={actions.resetParticles}>Reset Pos</button>
-            <button style={{ flex: 1, padding: '8px' }} onClick={actions.randomizeRules}>Randomize Rules</button>
+            <button style={{ flex: 1, padding: '8px' }} onClick={handleRandomize}>Randomize Rules</button>
         </div>
 
         <MatrixManipulator 
                 matrix={sim.matrix}
                 particleKinds={sim.particleKinds}
-                updateMatrixValueAtCoords={handleUpdate}
+                updateMatrixValueAtCoords={handleMatrixUpdate}
                 getCellColor={getCellColor}
             />
         </>
