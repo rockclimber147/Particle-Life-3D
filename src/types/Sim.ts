@@ -4,8 +4,8 @@ export type SimState = {
     forceFactor: number;
     frictionFactor: number;
     rMax: number;
-    attractionCoefficientMatrix: number[][];
-    betaCoefficientMatrix: number[][];
+    attractionCoefficientMatrix: Float32Array;
+    betaCoefficientMatrix: Float32Array;
 
     colors: Int32Array;
     positionsX: Float32Array;
@@ -25,6 +25,6 @@ export type SimActions = {
     randomizeRules: () => void
     resetParticles: () => void
     setRandomVelocities: () => void
-    updateMatrixValueAtCoords: (matrix: number[][], i: number, j: number, delta: number, min: number, max: number) => void
-    randomizeMatrix: (matrix: number[][], min: number, max: number, step: number) => void
+    updateMatrixValueAtCoords: (matrix: Float32Array, i: number, j: number, delta: number, min: number, max: number) => void
+    randomizeMatrix: (matrix: Float32Array, min: number, max: number, step: number) => void
 }

@@ -1,12 +1,14 @@
+import { to2DMatrix } from "../utils/MatrixHelper";
+
 export type MatrixManipulatorProps = {
     title: string;
-    matrix: number[][];
+    matrix: Float32Array;
     particleKinds: number;
     min: number;
     max: number;
     delta: number;
-    updateMatrixValueAtCoords: (matrix: number[][], i: number, j: number, delta: number, min: number, max: number) => void;
-    randomizeMatrix: (matrix: number[][], min: number, max: number, step: number) => void;
+    updateMatrixValueAtCoords: (matrix: Float32Array, i: number, j: number, delta: number, min: number, max: number) => void;
+    randomizeMatrix: (matrix: Float32Array, min: number, max: number, step: number) => void;
     getCellColor: (val: number) => string;
 }
 
@@ -35,7 +37,7 @@ export default function MatrixManipulator(props: MatrixManipulatorProps) {
                     }} />
                 ))}
 
-                {props.matrix.map((row, i) => (
+                {to2DMatrix(props.matrix, props.particleKinds).map((row, i) => (
                     <div key={`row-group-${i}`} style={{ display: 'contents' }}> 
                         {/* Left Header Cell (Row label) */}
                         <div style={{ 

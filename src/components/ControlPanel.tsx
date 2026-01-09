@@ -15,12 +15,12 @@ export default function ControlPanel(props: ControlPanelProps) {
     const actions = props.actions;
     const sim = props.state;
 
-    const handleMatrixUpdate = (matrix: number[][], i: number, j: number, delta: number, min: number, max: number) => {
+    const handleMatrixUpdate = (matrix: Float32Array, i: number, j: number, delta: number, min: number, max: number) => {
         actions.updateMatrixValueAtCoords(matrix, i, j, delta, min, max);
         setTick(t => t + 1);
     };
 
-    const handleMatrixRandomize = (matrix: number[][], min: number, max: number, step: number) => {
+    const handleMatrixRandomize = (matrix: Float32Array, min: number, max: number, step: number) => {
         actions.randomizeMatrix(matrix, min, max, step);
         setTick(t => t + 1);
     };

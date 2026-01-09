@@ -25,3 +25,11 @@ export function initializeExactMatrix(size: number, val: number): Float32Array {
     array.fill(val);
     return array;
 }
+
+export function randomizeInPlace(matrix: Float32Array, min: number, max: number, step: number) {
+    for (let i = 0; i < matrix.length; i++) {
+        let val = Math.random() * (max - min) + min;
+        val = Math.round(val / step) * step
+        matrix[i] = val;
+    }
+}

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import ControlPanel from './components/ControlPanel';
 import type { SimState, SimActions } from './types/Sim';
 import { SIM_LIMITS } from './constants/SimConstants';
+import { initializeExactMatrix, initializeRandomMatrix, randomizeInPlace } from './utils/MatrixHelper';
 
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -28,33 +29,9 @@ export default function App() {
     velocitiesX: new Float32Array(maxNumParticles),
     velocitiesY: new Float32Array(maxNumParticles),
     velocitiesZ: new Float32Array(maxNumParticles),
-    attractionCoefficientMatrix: makeRandomMatrix(defaultParticleKinds),
-    betaCoefficientMatrix: initializeBetaMatrix(defaultParticleKinds, SIM_LIMITS.DEFAULT_BETA)
+    attractionCoefficientMatrix: initializeRandomMatrix(defaultParticleKinds, -1, 1, 0.1),
+    betaCoefficientMatrix: initializeExactMatrix(defaultParticleKinds, SIM_LIMITS.DEFAULT_BETA)
   });
-
-  function makeRandomMatrix(size: number): number[][] {
-    const rows: number[][] = [];
-    for (let i = 0; i < size; i++) {
-      const row: number[] = [];
-      for (let j = 0; j < size; j++) {
-        row.push(Math.random() * 2 - 1);
-      }
-      rows.push(row);
-    }
-    return rows;
-  }
-
-  function initializeBetaMatrix(size: number, beta: number) {
-    const rows: number[][] = [];
-    for (let i = 0; i < size; i++) {
-      const row: number[] = [];
-      for (let j = 0; j < size; j++) {
-        row.push(beta);
-      }
-      rows.push(row);
-    }
-    return rows;
-  }
 
   const resetParticles = () => {
     const s = sim.current;
@@ -70,8 +47,8 @@ export default function App() {
   };
 
   const resetMatrices = () => {
-    sim.current.attractionCoefficientMatrix = makeRandomMatrix(sim.current.particleKinds);
-    sim.current.betaCoefficientMatrix = initializeBetaMatrix(sim.current.particleKinds, SIM_LIMITS.DEFAULT_BETA)
+    sim.current.attractionCoefficientMatrix = initializeRandomMatrix(defaultParticleKinds, -1, 1, 0.1);
+    sim.current.betaCoefficientMatrix = initializeExactMatrix(defaultParticleKinds, SIM_LIMITS.DEFAULT_BETA)
   };
 
   const updatePositions = () => {
@@ -106,7 +83,10 @@ export default function App() {
         const r = Math.sqrt(rx * rx + ry * ry + rz * rz);
 
         if (r > 0 && r < s.rMax) {
-          const f = force(r / s.rMax, s.attractionCoefficientMatrix[s.colors[i]][s.colors[j]], s.betaCoefficientMatrix[s.colors[i]][s.colors[j]]);
+          const f = force(
+            r / s.rMax, s.attractionCoefficientMatrix[s.particleKinds * s.colors[i] + s.colors[j]], 
+            s.betaCoefficientMatrix[s.particleKinds * s.colors[i] + s.colors[j]]
+          );
           const invR = f / r;
           totalForceX += rx * invR;
           totalForceY += ry * invR;
@@ -191,7 +171,7 @@ export default function App() {
       sim.current.frictionFactor = Math.pow(0.5, timeStep / val);
     },
     randomizeRules: function (): void {
-      sim.current.attractionCoefficientMatrix = makeRandomMatrix(sim.current.particleKinds);
+      sim.current.attractionCoefficientMatrix = initializeRandomMatrix(defaultParticleKinds, -1, 1, 0.1);
     },
     resetParticles: function (): void {
       resetParticles();
@@ -204,17 +184,12 @@ export default function App() {
         s.velocitiesZ[i] = Math.random() * 10 - 5;
       }
     },
-    updateMatrixValueAtCoords: function (matrix: number[][], i: number, j: number, delta: number, min: number, max: number): void {
-      const newVal = Math.max(min, Math.min(max, matrix[i][j] + delta));
-      matrix[i][j] = newVal;
+    updateMatrixValueAtCoords: function (matrix: Float32Array, i: number, j: number, delta: number, min: number, max: number): void {
+      const newVal = Math.max(min, Math.min(max, matrix[sim.current.particleKinds * i + j] + delta));
+      matrix[sim.current.particleKinds * i + j] = newVal;
     },
-    randomizeMatrix: function (matrix: number[][], min: number, max: number, step: number): void {
-      for (let i = 0; i < matrix.length; i++) {
-            for (let j = 0; j < matrix[i].length; j++) {
-                const randomVal = Math.random() * (max - min) + min;
-                matrix[i][j] = Math.round(randomVal / step) * step;
-            }
-        }
+    randomizeMatrix: function (matrix: Float32Array, min: number, max: number, step: number): void {
+      randomizeInPlace(matrix, min, max, step);
     }
   }
 
