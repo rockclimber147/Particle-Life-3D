@@ -28,15 +28,28 @@ export default function App() {
     velocitiesX: new Float32Array(maxNumParticles),
     velocitiesY: new Float32Array(maxNumParticles),
     velocitiesZ: new Float32Array(maxNumParticles),
-    attractionCoefficientMatrix: makeRandomMatrix(defaultParticleKinds)
+    attractionCoefficientMatrix: makeRandomMatrix(defaultParticleKinds),
+    betaCoefficientMatrix: initializeBetaMatrix(defaultParticleKinds, SIM_LIMITS.DEFAULT_BETA)
   });
 
-  function makeRandomMatrix(kinds: number): number[][] {
+  function makeRandomMatrix(size: number): number[][] {
     const rows: number[][] = [];
-    for (let i = 0; i < kinds; i++) {
+    for (let i = 0; i < size; i++) {
       const row: number[] = [];
-      for (let j = 0; j < kinds; j++) {
+      for (let j = 0; j < size; j++) {
         row.push(Math.random() * 2 - 1);
+      }
+      rows.push(row);
+    }
+    return rows;
+  }
+
+  function initializeBetaMatrix(size: number, beta: number) {
+    const rows: number[][] = [];
+    for (let i = 0; i < size; i++) {
+      const row: number[] = [];
+      for (let j = 0; j < size; j++) {
+        row.push(beta);
       }
       rows.push(row);
     }
@@ -56,7 +69,7 @@ export default function App() {
     }
   };
 
-  const resetMatrix = () => {
+  const resetMatrices = () => {
     sim.current.attractionCoefficientMatrix = makeRandomMatrix(sim.current.particleKinds);
   };
 
@@ -92,7 +105,7 @@ export default function App() {
         const r = Math.sqrt(rx * rx + ry * ry + rz * rz);
 
         if (r > 0 && r < s.rMax) {
-          const f = force(r / s.rMax, s.attractionCoefficientMatrix[s.colors[i]][s.colors[j]]);
+          const f = force(r / s.rMax, s.attractionCoefficientMatrix[s.colors[i]][s.colors[j]], s.betaCoefficientMatrix[s.colors[i]][s.colors[j]]);
           const invR = f / r;
           totalForceX += rx * invR;
           totalForceY += ry * invR;
@@ -110,8 +123,7 @@ export default function App() {
     }
   };
 
-  function force(r: number, a: number) {
-    const beta = 0.3;
+  function force(r: number, a: number, beta: number) {
     if (r < beta) return r / beta - 1;
     else if (beta < r && r < 1) return a * (1 - Math.abs(2 * r - 1 - beta) / (1 - beta));
     return 0;
@@ -161,7 +173,7 @@ export default function App() {
   const actions: SimActions = {
     updateParticleKinds: function (val: number): void {
       sim.current.particleKinds = val;
-      resetMatrix();
+      resetMatrices();
       resetParticles();
     },
     updateTotalParticles: function (val: number): void {
@@ -178,7 +190,7 @@ export default function App() {
       sim.current.frictionFactor = Math.pow(0.5, timeStep / val);
     },
     randomizeRules: function (): void {
-      resetMatrix();
+      resetMatrices();
     },
     resetParticles: function (): void {
       resetParticles();
