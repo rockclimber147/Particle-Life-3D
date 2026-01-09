@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ControlPanel from './components/ControlPanel';
 import type { SimState, SimActions } from './types/Sim';
 import { SIM_LIMITS } from './constants/SimConstants';
@@ -7,6 +7,7 @@ import { SimulationEngine } from './utils/SimulationEngine';
 
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const maxNumParticles = SIM_LIMITS.MAX_PARTICLES;
   const defaultNumParticles = SIM_LIMITS.DEFAULT_PARTICLES;
@@ -48,8 +49,10 @@ export default function App() {
       engine.updatePositions();
 
       const edgeLength = Math.min(window.innerWidth, window.innerHeight)
-      canvas.width = edgeLength
-      canvas.height = edgeLength
+      if (canvas.width !== edgeLength) {
+        canvas.width = edgeLength;
+        canvas.height = edgeLength;
+      }
 
       ctx.fillStyle = 'black';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -120,22 +123,64 @@ export default function App() {
   }
 
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ 
+      width: '100vw', height: '100vh', 
+      position: 'relative', overflow: 'hidden',
+      backgroundColor: 'black',
+      display: 'flex', alignItems: 'center', justifyContent: 'center'
+    }}>
+      {/* Control Panel Container */}
       <div style={{
         position: 'absolute', top: 10, left: 10, zIndex: 10,
-        background: 'rgba(0, 0, 0, 0)', padding: '20px', borderRadius: '8px',
-        color: 'white', display: 'flex', flexDirection: 'column', gap: '15px',
-        width: '260px', fontFamily: 'sans-serif', fontSize: '14px'
+        background: 'rgba(20, 20, 20, 0.85)',
+        padding: '15px', 
+        borderRadius: '8px',
+        color: 'white', 
+        display: 'flex', 
+        flexDirection: 'column',
+        width: '280px', 
+        fontFamily: 'sans-serif', 
+        fontSize: '14px',
+        maxHeight: 'calc(100vh - 40px)',
+        
+        boxSizing: 'border-box',
+        overflowX: 'hidden',
+        
+        boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+        border: '1px solid rgba(255,255,255,0.1)'
       }}>
-        <h3 style={{ margin: '0 0 5px 0' }}>Particle Life 3D</h3>
+        
+        {/* Header Section with Toggle */}
+        <div style={{ 
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          marginBottom: isCollapsed ? '0' : '15px', cursor: 'pointer' 
+        }} onClick={() => setIsCollapsed(!isCollapsed)}>
+          <h3 style={{ margin: 0 }}>Particle Life 3D</h3>
+          <button style={{ 
+            background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '18px'
+          }}>
+            {isCollapsed ? '+' : '−'}
+          </button>
+        </div>
 
-        <ControlPanel
-            state={sim.current} 
-            actions={actions} 
-        />
+        {/* Scrollable Content Area */}
+        {!isCollapsed && (
+          <div style={{ 
+            overflowY: 'auto', 
+            paddingRight: '5px',
+            overflowX: 'hidden',
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#444 transparent'
+          }}>
+            <ControlPanel
+                state={sim.current} 
+                actions={actions} 
+            />
+          </div>
+        )}
       </div>
 
-      <canvas ref={canvasRef} style={{ display: 'block', background: 'black' }} />
+      <canvas ref={canvasRef} style={{ display: 'block' }} />
     </div>
   );
 }
