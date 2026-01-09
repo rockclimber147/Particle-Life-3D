@@ -43,6 +43,11 @@ export class SimulationEngine {
         }
     };
 
+    updateRMax(val: number): void {
+        this.s.rMax = val;
+        this.uniformGrid.setResolution(this.s.rMax);
+    }
+
 
     force(r: number, a: number, beta: number) {
         if (r < beta) return r / beta - 1;
@@ -69,7 +74,6 @@ export class SimulationEngine {
                         
                         const { cellIdx, ox, oy, oz } = this.uniformGrid.getNeighborData(gx, gy, gz, dx, dy, dz);
 
-                        // 3. Traverse cell chain
                         let j = this.uniformGrid.head[cellIdx];
                         while (j !== -1) {
                             if (i !== j) {

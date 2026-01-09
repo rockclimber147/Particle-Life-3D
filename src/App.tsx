@@ -91,7 +91,7 @@ export default function App() {
       sim.current.forceFactor = val;
     },
     updateMaxRadius: function (val: number): void {
-      sim.current.rMax = val;
+      engine.updateRMax(val);
     },
     updateFrictionHalfLife: function (val: number): void {
       sim.current.frictionFactor = Math.pow(0.5, timeStep / val);
