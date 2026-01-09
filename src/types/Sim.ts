@@ -6,6 +6,7 @@ export type SimState = {
     rMax: number;
     attractionCoefficientMatrix: Float32Array;
     betaCoefficientMatrix: Float32Array;
+    timeStep: number
 
     colors: Int32Array;
     positionsX: Float32Array;
