@@ -13,7 +13,7 @@ In a naive simulation, every particle must check the distance to every other par
 1. Grid Voxelization: The 3D space is divided into a grid of voxels (cells). The size of each cell is set to match the maximum interaction radius (rMax).
 2. Flat Array Mapping: Rather than using complex nested objects, the grid is stored as a 1D Int32Array.
 3. Linked-List Chains: A "Head" array stores the index of the first particle in a cell, while a "Next" array allows the engine to iterate through all particles in that specific cell.
-4. Local Lookups: When calculating forces for a particle, the engine only checks its current cell and the 26 immediate neighboring cells. This reduces the complexity to roughly O(n), allowing for significantly higher particle densities.
+4. Local Lookups: When calculating forces for a particle, the engine only checks its current cell and the 26 immediate neighboring cells.
 5. Periodic Wraparound: The grid logic accounts for toroidal space, meaning particles that exit one side of the grid immediately interact with particles on the opposite side.
 
 ---
