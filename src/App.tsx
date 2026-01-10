@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import ControlPanel from './components/ControlPanel';
-import type { SimState, SimActions } from './types/Sim';
+import type { SimState } from './types/Sim';
 import { SIM_LIMITS } from './constants/SimConstants';
-import { initializeExactMatrix, initializeRandomMatrix, randomizeInPlace } from './utils/MatrixHelper';
+import { initializeExactMatrix, initializeRandomMatrix } from './utils/MatrixHelper';
 import { SimulationEngine } from './utils/SimulationEngine';
 
 export default function App() {
@@ -80,48 +80,6 @@ export default function App() {
     return () => cancelAnimationFrame(animationFrameId);
   }, []);
 
-  const actions: SimActions = {
-    updateParticleKinds: function (val: number): void {
-      sim.current.particleKinds = val;
-      engine.resetMatrices();
-      engine.resetParticles();
-    },
-    updateTotalParticles: function (val: number): void {
-      sim.current.numParticles = val;
-      engine.resetParticles();
-    },
-    updateForceFactor: function (val: number): void {
-      sim.current.forceFactor = val;
-    },
-    updateMaxRadius: function (val: number): void {
-      engine.updateRMax(val);
-    },
-    updateFrictionHalfLife: function (val: number): void {
-      sim.current.frictionFactor = Math.pow(0.5, timeStep / val);
-    },
-    randomizeRules: function (): void {
-      sim.current.attractionCoefficientMatrix = initializeRandomMatrix(defaultParticleKinds, -1, 1, 0.1);
-    },
-    resetParticles: function (): void {
-      engine.resetParticles();
-    },
-    setRandomVelocities: function (): void {
-      const s = sim.current;
-      for (let i = 0; i < s.numParticles; i++) {
-        s.velocitiesX[i] = Math.random() * 10 - 5;
-        s.velocitiesY[i] = Math.random() * 10 - 5;
-        s.velocitiesZ[i] = Math.random() * 10 - 5;
-      }
-    },
-    updateMatrixValueAtCoords: function (matrix: Float32Array, i: number, j: number, delta: number, min: number, max: number): void {
-      const newVal = Math.max(min, Math.min(max, matrix[sim.current.particleKinds * i + j] + delta));
-      matrix[sim.current.particleKinds * i + j] = newVal;
-    },
-    randomizeMatrix: function (matrix: Float32Array, min: number, max: number, step: number): void {
-      randomizeInPlace(matrix, min, max, step);
-    }
-  }
-
   return (
     <div style={{ 
       width: '100vw', height: '100vh', 
@@ -174,7 +132,7 @@ export default function App() {
           }}>
             <ControlPanel
                 state={sim.current} 
-                actions={actions} 
+                actions={engine.actions} 
             />
           </div>
         )}

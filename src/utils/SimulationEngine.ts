@@ -1,14 +1,41 @@
-import { initializeExactMatrix, initializeRandomMatrix } from "./MatrixHelper";
-import type { SimState } from "../types/Sim";
+import { initializeExactMatrix, initializeRandomMatrix, randomizeInPlace } from "./MatrixHelper";
+import type { SimActions, SimState } from "../types/Sim";
 import { SIM_LIMITS } from "../constants/SimConstants";
 import { UniormGridPartition } from "./UniformGridPartition";
+
 export class SimulationEngine {
     private s: SimState
     private uniformGrid = new UniormGridPartition();
+    public readonly actions: SimActions;
 
     constructor(state: SimState) {
         this.s = state;
         this.uniformGrid.setResolution(this.s.rMax);
+        this.actions = {
+            updateParticleKinds: this.updateParticleKinds,
+            updateTotalParticles: this.updateTotalParticles,
+            updateForceFactor: (val: number) => this.s.forceFactor = val,
+            updateMaxRadius: this.updateRMax,
+            updateFrictionHalfLife: (val: number) => this.s.frictionFactor = Math.pow(0.5, this.s.timeStep / val),
+            setRandomVelocities: this.setRandomVelocities,
+            updateMatrixValueAtCoords: (matrix: Float32Array, i: number, j: number, delta: number, min: number, max: number): void => {
+            const newVal = Math.max(min, Math.min(max, matrix[this.s.particleKinds * i + j] + delta));
+            matrix[this.s.particleKinds * i + j] = newVal;
+            },
+            randomizeMatrix: randomizeInPlace
+        }
+    }
+
+
+    updateParticleKinds = (val: number) => {
+        this.s.particleKinds = val;
+        this.resetMatrices();
+        this.resetParticles();
+    };
+
+    updateTotalParticles = (val: number) => {
+        this.s.numParticles = val;
+        this.resetParticles();
     }
 
     resetParticles(): void {
@@ -43,7 +70,16 @@ export class SimulationEngine {
         }
     };
 
-    updateRMax(val: number): void {
+    setRandomVelocities = () => {
+      const s = this.s;
+      for (let i = 0; i < s.numParticles; i++) {
+        s.velocitiesX[i] = Math.random() * 10 - 5;
+        s.velocitiesY[i] = Math.random() * 10 - 5;
+        s.velocitiesZ[i] = Math.random() * 10 - 5;
+      }
+    }
+
+    updateRMax = (val: number): void => {
         this.s.rMax = val;
         this.uniformGrid.setResolution(this.s.rMax);
     }
