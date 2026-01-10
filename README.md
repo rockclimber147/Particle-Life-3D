@@ -1,4 +1,4 @@
-# Particle Life 3D
+# [Particle Life 3D](https://particlelife3d.netlify.app/)
 
 A high-performance 3D particle life simulation built with React and TypeScript. This project simulates emergent behaviors through simple attraction and repulsion rules between different species of particles. Initial concept from this [video](https://www.youtube.com/watch?v=scvuli-zcRc) by [Tom Mohr](https://www.youtube.com/@tom-mohr)
 
