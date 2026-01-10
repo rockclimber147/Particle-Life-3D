@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import ControlPanel from "../components/ControlPanel";
 import type { SimState } from "../types/Sim";
 import { SIM_LIMITS } from "../constants/SimConstants";
@@ -11,6 +11,7 @@ import { SimulationEngine } from "../utils/SimulationEngine";
 export default function ParticleLifeSimulation() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [is2DUI, setIs2DUI] = useState(false);
 
   const maxNumParticles = SIM_LIMITS.MAX_PARTICLES;
   const defaultNumParticles = SIM_LIMITS.DEFAULT_PARTICLES;
@@ -46,7 +47,7 @@ export default function ParticleLifeSimulation() {
     ),
   });
 
-  const engine: SimulationEngine = new SimulationEngine(sim.current);
+  const engine = useMemo(() => new SimulationEngine(sim.current), []);
 
   useEffect(() => {
     engine.resetParticles();
@@ -138,9 +139,28 @@ export default function ParticleLifeSimulation() {
             marginBottom: isCollapsed ? "0" : "15px",
             cursor: "pointer",
           }}
-          onClick={() => setIsCollapsed(!isCollapsed)}
         >
-          <h3 style={{ margin: 0 }}>Particle Life 3D</h3>
+          <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            Particle Life 
+            <button 
+                onClick={() => {
+                    engine.toggle3rdDimension();
+                    setIs2DUI(engine.getIs2D());
+                }}
+                style={{
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    borderRadius: '4px',
+                    color: 'white',
+                    padding: '2px 8px',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    fontFamily: 'monospace'
+                }}
+            >
+                {is2DUI ? '2D' : '3D'}
+            </button>
+        </h3>
           <button
             style={{
               background: "none",
@@ -149,6 +169,7 @@ export default function ParticleLifeSimulation() {
               cursor: "pointer",
               fontSize: "18px",
             }}
+            onClick={() => setIsCollapsed(!isCollapsed)}
           >
             {isCollapsed ? "+" : "−"}
           </button>

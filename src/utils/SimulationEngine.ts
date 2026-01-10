@@ -8,9 +8,12 @@ import { SIM_LIMITS } from "../constants/SimConstants";
 import { UniormGridPartition } from "./UniformGridPartition";
 
 export class SimulationEngine {
+  private readonly Z_2D = 0.5
+
   private s: SimState;
   private uniformGrid = new UniormGridPartition();
   public readonly actions: SimActions;
+  private is2D: boolean = false;
 
   constructor(state: SimState) {
     this.s = state;
@@ -59,7 +62,7 @@ export class SimulationEngine {
       s.colors[i] = Math.floor(Math.random() * s.particleKinds);
       s.positionsX[i] = Math.random() / 5 - 1 / 10 + 0.5;
       s.positionsY[i] = Math.random() / 5 - 1 / 10 + 0.5;
-      s.positionsZ[i] = Math.random() / 5 - 1 / 10 + 0.5;
+      s.positionsZ[i] = this.is2D ? this.Z_2D: Math.random() / 5 - 1 / 10 + 0.5;
       s.velocitiesX[i] = 0;
       s.velocitiesY[i] = 0;
       s.velocitiesZ[i] = 0;
@@ -98,7 +101,7 @@ export class SimulationEngine {
     for (let i = 0; i < s.numParticles; i++) {
       s.velocitiesX[i] = Math.random() * 10 - 5;
       s.velocitiesY[i] = Math.random() * 10 - 5;
-      s.velocitiesZ[i] = Math.random() * 10 - 5;
+      s.velocitiesZ[i] = this.is2D ? 0 : Math.random() * 10 - 5;
     }
   };
 
@@ -203,5 +206,31 @@ export class SimulationEngine {
       };
     }
     return null;
+  }
+
+  toggle3rdDimension() {
+    console.log("toggling...")
+    this.is2D = !this.is2D;
+    if (!this.is2D) this.set3D();
+    else this.set2D();
+  }
+
+  set2D() {
+    for (let i = 0; i < this.s.numParticles; i++) {
+        this.s.positionsZ[i] = this.Z_2D;
+        this.s.velocitiesZ[i] = 0;
+    }
+  }
+
+  set3D() {
+    console.log("Setting 3d")
+    for (let i = 0; i < this.s.numParticles; i++) {
+        this.s.positionsZ[i] = this.Z_2D + (Math.random() -0.5) / 10;
+        this.s.velocitiesZ[i] = this.Z_2D + (Math.random() -0.5) / 10;
+    }
+  }
+
+  getIs2D(): boolean {
+    return this.is2D
   }
 }
