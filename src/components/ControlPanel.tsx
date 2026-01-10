@@ -91,7 +91,7 @@ export default function ControlPanel(props: ControlPanelProps) {
             />
         
         <MatrixManipulator 
-                title="Beta Coefficients"
+                title="Repulsion Coefficients"
                 matrix={sim.betaCoefficientMatrix}
                 particleKinds={sim.particleKinds}
                 updateMatrixValueAtCoords={handleMatrixUpdate}
