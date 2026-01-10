@@ -16,7 +16,34 @@ export default function MatrixManipulator(props: MatrixManipulatorProps) {
 
     return (
         <>
-            <span style={{ fontSize: '12px', fontWeight: 'bold' }}>{props.title}</span>
+            <p></p>
+            <div style={{ 
+                fontSize: '14px', 
+                fontWeight: 'bold', 
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                width: '100%',
+                marginBottom: '8px' 
+            }}>
+                <span>{props.title}</span> {/* Wrap text in a span for cleaner flex handling */}
+                
+                <button 
+                    onClick={() => props.randomizeMatrix(props.matrix, props.min, props.max, props.delta)}
+                    style={{ 
+                        fontSize: '11px', 
+                        padding: '2px 8px', 
+                        cursor: 'pointer',
+                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.3)',
+                        borderRadius: '4px',
+                        color: 'white',
+                        outline: 'none'
+                    }}
+                >
+                    Randomize
+                </button>
+            </div>
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: `repeat(${props.particleKinds + 1}, 1fr)`,
@@ -75,12 +102,6 @@ export default function MatrixManipulator(props: MatrixManipulatorProps) {
                     </div>
                 ))}
             </div>
-                <button 
-                    onClick={() => props.randomizeMatrix(props.matrix, props.min, props.max, props.delta)}
-                    style={{ fontSize: '10px', padding: '2px 5px', cursor: 'pointer' }}
-                >
-                    Randomize
-                </button>
         </>
     )
 }
