@@ -20,11 +20,12 @@ In a naive simulation, every particle must check the distance to every other par
 
 ## User Interface and Controls
 
-The Control Panel provides real-time manipulation of the simulation physics and environment.
+The Control Panel provides real-time manipulation of the simulation physics and environment. It contains a 2d/3d toggle which will snap particles to a plane perpendicular to the z axis when in 2D mode.
 
 ### Simulation Environment
 
 - Shake: Injects random velocities into all particles. This is useful for breaking up static clusters or unfreezing a simulation that has reached a low-energy state.
+- Time Step: Adjusts the time delta of the simulation. Increasing this makes the simulation run faster at a tradeoff of structures becoming less stable.
 - Particle Kinds: Adjusts the number of unique species in the simulation. Increasing this adds more complexity to the interaction matrices.
 - Total Particles: Controls the density of the simulation. Higher counts lead to more complex emergent structures but increase the computational load on the spatial partitioner.
 
