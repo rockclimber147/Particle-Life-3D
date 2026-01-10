@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
-import ControlPanel from '../components/ControlPanel';
-import type { SimState } from '../types/Sim';
-import { SIM_LIMITS } from '../constants/SimConstants';
-import { initializeExactMatrix, initializeRandomMatrix } from '../utils/MatrixHelper';
-import { SimulationEngine } from '../utils/SimulationEngine';
+import { useEffect, useRef, useState } from "react";
+import ControlPanel from "../components/ControlPanel";
+import type { SimState } from "../types/Sim";
+import { SIM_LIMITS } from "../constants/SimConstants";
+import {
+  initializeExactMatrix,
+  initializeRandomMatrix,
+} from "../utils/MatrixHelper";
+import { SimulationEngine } from "../utils/SimulationEngine";
 
 export default function ParticleLifeSimulation() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -31,30 +34,38 @@ export default function ParticleLifeSimulation() {
     velocitiesX: new Float32Array(maxNumParticles),
     velocitiesY: new Float32Array(maxNumParticles),
     velocitiesZ: new Float32Array(maxNumParticles),
-    attractionCoefficientMatrix: initializeRandomMatrix(defaultParticleKinds, -1, 1, 0.1),
-    betaCoefficientMatrix: initializeExactMatrix(defaultParticleKinds, SIM_LIMITS.DEFAULT_BETA)
+    attractionCoefficientMatrix: initializeRandomMatrix(
+      defaultParticleKinds,
+      -1,
+      1,
+      0.1,
+    ),
+    betaCoefficientMatrix: initializeExactMatrix(
+      defaultParticleKinds,
+      SIM_LIMITS.DEFAULT_BETA,
+    ),
   });
 
   const engine: SimulationEngine = new SimulationEngine(sim.current);
 
   useEffect(() => {
     engine.resetParticles();
-    
+
     const canvas = canvasRef.current!;
-    const ctx = canvas.getContext('2d')!;
+    const ctx = canvas.getContext("2d")!;
     let animationFrameId: number;
 
     const animate = () => {
       engine.updateVelocities();
       engine.updatePositions();
 
-      const edgeLength = Math.min(window.innerWidth, window.innerHeight)
+      const edgeLength = Math.min(window.innerWidth, window.innerHeight);
       if (canvas.width !== edgeLength) {
         canvas.width = edgeLength;
         canvas.height = edgeLength;
       }
 
-      ctx.fillStyle = 'black';
+      ctx.fillStyle = "black";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       const s = sim.current;
@@ -81,64 +92,85 @@ export default function ParticleLifeSimulation() {
   }, []);
 
   return (
-    <div style={{ 
-      width: '100vw', height: '100vh', 
-      position: 'relative', overflow: 'hidden',
-      backgroundColor: 'black',
-      display: 'flex', alignItems: 'center', justifyContent: 'center'
-    }}>
+    <div
+      style={{
+        width: "100vw",
+        height: "100vh",
+        position: "relative",
+        overflow: "hidden",
+        backgroundColor: "black",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       {/* Control Panel Container */}
-      <div style={{
-        position: 'absolute', top: 10, left: 10, zIndex: 10,
-        background: 'rgba(20, 20, 20, 0.85)',
-        padding: '15px', 
-        borderRadius: '8px',
-        color: 'white', 
-        display: 'flex', 
-        flexDirection: 'column',
-        width: '280px', 
-        fontFamily: 'sans-serif', 
-        fontSize: '14px',
-        maxHeight: 'calc(100vh - 40px)',
-        
-        boxSizing: 'border-box',
-        overflowX: 'hidden',
-        
-        boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
-        border: '1px solid rgba(255,255,255,0.1)'
-      }}>
-        
+      <div
+        style={{
+          position: "absolute",
+          top: 10,
+          left: 10,
+          zIndex: 10,
+          background: "rgba(20, 20, 20, 0.85)",
+          padding: "15px",
+          borderRadius: "8px",
+          color: "white",
+          display: "flex",
+          flexDirection: "column",
+          width: "280px",
+          fontFamily: "sans-serif",
+          fontSize: "14px",
+          maxHeight: "calc(100vh - 40px)",
+
+          boxSizing: "border-box",
+          overflowX: "hidden",
+
+          boxShadow: "0 4px 15px rgba(0,0,0,0.5)",
+          border: "1px solid rgba(255,255,255,0.1)",
+        }}
+      >
         {/* Header Section with Toggle */}
-        <div style={{ 
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          marginBottom: isCollapsed ? '0' : '15px', cursor: 'pointer' 
-        }} onClick={() => setIsCollapsed(!isCollapsed)}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: isCollapsed ? "0" : "15px",
+            cursor: "pointer",
+          }}
+          onClick={() => setIsCollapsed(!isCollapsed)}
+        >
           <h3 style={{ margin: 0 }}>Particle Life 3D</h3>
-          <button style={{ 
-            background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '18px'
-          }}>
-            {isCollapsed ? '+' : '−'}
+          <button
+            style={{
+              background: "none",
+              border: "none",
+              color: "white",
+              cursor: "pointer",
+              fontSize: "18px",
+            }}
+          >
+            {isCollapsed ? "+" : "−"}
           </button>
         </div>
 
         {/* Scrollable Content Area */}
         {!isCollapsed && (
-          <div style={{ 
-            overflowY: 'auto', 
-            paddingRight: '5px',
-            overflowX: 'hidden',
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#444 transparent'
-          }}>
-            <ControlPanel
-                state={sim.current} 
-                actions={engine.actions} 
-            />
+          <div
+            style={{
+              overflowY: "auto",
+              paddingRight: "5px",
+              overflowX: "hidden",
+              scrollbarWidth: "thin",
+              scrollbarColor: "#444 transparent",
+            }}
+          >
+            <ControlPanel state={sim.current} actions={engine.actions} />
           </div>
         )}
       </div>
 
-      <canvas ref={canvasRef} style={{ display: 'block' }} />
+      <canvas ref={canvasRef} style={{ display: "block" }} />
     </div>
   );
 }
