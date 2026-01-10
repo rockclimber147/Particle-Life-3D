@@ -60,6 +60,16 @@ export default function ControlPanel(props: ControlPanelProps) {
           Shake
         </button>
       </div>
+
+      <NumericLabelSlider
+        title="Time Step"
+        initialValue={sim.timeStep}
+        min={SIM_LIMITS.MIN_TIMESTEP}
+        max={SIM_LIMITS.MAX_TIMESTEP}
+        step={SIM_LIMITS.MIN_TIMESTEP}
+        onChange={actions.updateTimeStep}
+      />
+
       <NumericLabelSlider
         title="Particle Kinds"
         initialValue={sim.particleKinds}

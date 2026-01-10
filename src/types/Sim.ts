@@ -18,6 +18,7 @@ export type SimState = {
 };
 
 export type SimActions = {
+  updateTimeStep: (val: number) => void;
   updateParticleKinds: (val: number) => void;
   updateTotalParticles: (val: number) => void;
   updateForceFactor: (val: number) => void;

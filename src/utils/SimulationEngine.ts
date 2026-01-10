@@ -16,6 +16,7 @@ export class SimulationEngine {
     this.s = state;
     this.uniformGrid.setResolution(this.s.rMax);
     this.actions = {
+      updateTimeStep: (val: number) => this.s.timeStep = val,
       updateParticleKinds: this.updateParticleKinds,
       updateTotalParticles: this.updateTotalParticles,
       updateForceFactor: (val: number) => (this.s.forceFactor = val),
