@@ -4,6 +4,8 @@ import NumericLabelSlider from "./LabelSlider";
 import MatrixManipulator from "./MatrixManipulator";
 import { useState, type CSSProperties } from "react";
 import { decodePreset, encodePreset, frictionHalfLifeFromFactor } from "../utils/SimPresetCodec";
+import PresetList from "./PresetList";
+import type { SimPreset } from "../types/SimPreset";
 
 export type ControlPanelProps = {
   state: SimState;
@@ -87,13 +89,17 @@ export default function ControlPanel(props: ControlPanelProps) {
         showPresetMessage(result.error);
         return;
       }
-      actions.applyPreset(result.preset);
-      setTick((t) => t + 1);
-      props.onPresetApplied?.();
+      applyLoadedPreset(result.preset);
       showPresetMessage("Preset applied");
     } catch {
       showPresetMessage("Failed to paste");
     }
+  };
+
+  const applyLoadedPreset = (preset: SimPreset) => {
+    actions.applyPreset(preset);
+    setTick((t) => t + 1);
+    props.onPresetApplied?.();
   };
 
   return (
@@ -214,6 +220,11 @@ export default function ControlPanel(props: ControlPanelProps) {
         min={0.05}
         max={1}
         delta={0.05}
+      />
+
+      <PresetList
+        exportPreset={actions.exportPreset}
+        onLoadPreset={applyLoadedPreset}
       />
     </>
   );
