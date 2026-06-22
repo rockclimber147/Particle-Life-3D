@@ -14,7 +14,9 @@ export function frictionHalfLifeFromFactor(
   if (frictionFactor <= 0 || frictionFactor >= 1) {
     return SIM_LIMITS.DEFAULT_FRICTION_HL;
   }
-  return (timeStep * Math.log(0.5)) / Math.log(frictionFactor);
+  return Number(
+    ((timeStep * Math.log(0.5)) / Math.log(frictionFactor)).toFixed(2),
+  );
 }
 
 export function createPresetFromState(
