@@ -78,9 +78,9 @@ export class SimulationEngine {
     const s = this.s;
     for (let i = 0; i < s.numParticles; i++) {
       s.colors[i] = Math.floor(Math.random() * s.particleKinds);
-      s.positionsX[i] = Math.random() / 5 - 1 / 10 + 0.5;
-      s.positionsY[i] = Math.random() / 5 - 1 / 10 + 0.5;
-      s.positionsZ[i] = this.is2D ? this.Z_2D: Math.random() / 5 - 1 / 10 + 0.5;
+      s.positionsX[i] = Math.random();
+      s.positionsY[i] = Math.random();
+      s.positionsZ[i] = this.is2D ? this.Z_2D : Math.random();
       s.velocitiesX[i] = 0;
       s.velocitiesY[i] = 0;
       s.velocitiesZ[i] = 0;
