@@ -2,18 +2,33 @@ import type { SimState, SimActions } from "../types/Sim";
 import { SIM_LIMITS } from "../constants/SimConstants";
 import NumericLabelSlider from "./LabelSlider";
 import MatrixManipulator from "./MatrixManipulator";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
+import { decodePreset, encodePreset, frictionHalfLifeFromFactor } from "../utils/SimPresetCodec";
 
 export type ControlPanelProps = {
   state: SimState;
   actions: SimActions;
+  configKey: number;
+  onPresetApplied?: () => void;
+};
+
+const presetButtonStyle: CSSProperties = {
+  flex: 1,
+  padding: "8px",
+  cursor: "pointer",
+  backgroundColor: "rgba(255,255,255,0.1)",
+  border: "1px solid rgba(255,255,255,0.3)",
+  borderRadius: "4px",
+  color: "white",
 };
 
 export default function ControlPanel(props: ControlPanelProps) {
   const [_, setTick] = useState(0);
+  const [presetMessage, setPresetMessage] = useState<string | null>(null);
 
   const actions = props.actions;
   const sim = props.state;
+  const sliderKey = `${props.configKey}-${_}`;
 
   const handleMatrixUpdate = (
     matrix: Float32Array,
@@ -50,6 +65,37 @@ export default function ControlPanel(props: ControlPanelProps) {
     return `rgba(0, 0, 0, 1)`;
   };
 
+  const showPresetMessage = (message: string) => {
+    setPresetMessage(message);
+    window.setTimeout(() => setPresetMessage(null), 2000);
+  };
+
+  const handleCopyPreset = async () => {
+    try {
+      await navigator.clipboard.writeText(encodePreset(actions.exportPreset()));
+      showPresetMessage("Copied to clipboard");
+    } catch {
+      showPresetMessage("Failed to copy");
+    }
+  };
+
+  const handlePastePreset = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      const result = decodePreset(text);
+      if (!result.ok) {
+        showPresetMessage(result.error);
+        return;
+      }
+      actions.applyPreset(result.preset);
+      setTick((t) => t + 1);
+      props.onPresetApplied?.();
+      showPresetMessage("Preset applied");
+    } catch {
+      showPresetMessage("Failed to paste");
+    }
+  };
+
   return (
     <>
       <div style={{ display: "flex", gap: "10px", marginTop: "5px" }}>
@@ -61,7 +107,28 @@ export default function ControlPanel(props: ControlPanelProps) {
         </button>
       </div>
 
+      <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+        <button style={presetButtonStyle} onClick={handleCopyPreset}>
+          Copy Config
+        </button>
+        <button style={presetButtonStyle} onClick={handlePastePreset}>
+          Paste Config
+        </button>
+      </div>
+      {presetMessage && (
+        <p
+          style={{
+            margin: "8px 0 0",
+            fontSize: "12px",
+            color: "rgba(255,255,255,0.7)",
+          }}
+        >
+          {presetMessage}
+        </p>
+      )}
+
       <NumericLabelSlider
+        key={`timeStep-${sliderKey}`}
         title="Time Step"
         initialValue={sim.timeStep}
         min={SIM_LIMITS.MIN_TIMESTEP}
@@ -71,6 +138,7 @@ export default function ControlPanel(props: ControlPanelProps) {
       />
 
       <NumericLabelSlider
+        key={`particleKinds-${sliderKey}`}
         title="Particle Kinds"
         initialValue={sim.particleKinds}
         min={SIM_LIMITS.MIN_KINDS}
@@ -80,6 +148,7 @@ export default function ControlPanel(props: ControlPanelProps) {
       />
 
       <NumericLabelSlider
+        key={`numParticles-${sliderKey}`}
         title="Total Particles"
         initialValue={sim.numParticles}
         min={SIM_LIMITS.MIN_PARTICLES}
@@ -89,6 +158,7 @@ export default function ControlPanel(props: ControlPanelProps) {
       />
 
       <NumericLabelSlider
+        key={`forceFactor-${sliderKey}`}
         title="Force Factor"
         initialValue={sim.forceFactor}
         min={SIM_LIMITS.MIN_FORCE}
@@ -98,6 +168,7 @@ export default function ControlPanel(props: ControlPanelProps) {
       />
 
       <NumericLabelSlider
+        key={`rMax-${sliderKey}`}
         title="Radius (rMax)"
         initialValue={sim.rMax}
         min={SIM_LIMITS.MIN_RMAX}
@@ -107,8 +178,12 @@ export default function ControlPanel(props: ControlPanelProps) {
       />
 
       <NumericLabelSlider
+        key={`frictionHalfLife-${sliderKey}`}
         title="Friction Half-Life"
-        initialValue={SIM_LIMITS.DEFAULT_FRICTION_HL}
+        initialValue={frictionHalfLifeFromFactor(
+          sim.timeStep,
+          sim.frictionFactor,
+        )}
         min={SIM_LIMITS.MIN_FRICTION_HL}
         max={SIM_LIMITS.MAX_FRICTION_HL}
         step={0.01}
@@ -116,6 +191,7 @@ export default function ControlPanel(props: ControlPanelProps) {
       />
 
       <MatrixManipulator
+        key={`attraction-${sliderKey}`}
         title="Attraction Coefficients"
         matrix={sim.attractionCoefficientMatrix}
         particleKinds={sim.particleKinds}
@@ -128,6 +204,7 @@ export default function ControlPanel(props: ControlPanelProps) {
       />
 
       <MatrixManipulator
+        key={`beta-${sliderKey}`}
         title="Repulsion Coefficients"
         matrix={sim.betaCoefficientMatrix}
         particleKinds={sim.particleKinds}

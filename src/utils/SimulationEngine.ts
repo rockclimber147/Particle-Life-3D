@@ -4,7 +4,9 @@ import {
   randomizeInPlace,
 } from "./MatrixHelper";
 import type { SimActions, SimState } from "../types/Sim";
+import type { SimPreset } from "../types/SimPreset";
 import { SIM_LIMITS } from "../constants/SimConstants";
+import { createPresetFromState } from "./SimPresetCodec";
 import { UniormGridPartition } from "./UniformGridPartition";
 
 export class SimulationEngine {
@@ -42,8 +44,24 @@ export class SimulationEngine {
         matrix[this.s.particleKinds * i + j] = newVal;
       },
       randomizeMatrix: randomizeInPlace,
+      exportPreset: () => createPresetFromState(this.s, this.is2D),
+      applyPreset: this.applyPreset,
     };
   }
+
+  applyPreset = (preset: SimPreset): void => {
+    const s = this.s;
+    s.timeStep = preset.timeStep;
+    s.particleKinds = preset.particleKinds;
+    s.attractionCoefficientMatrix = new Float32Array(preset.attractionMatrix);
+    s.betaCoefficientMatrix = new Float32Array(preset.betaMatrix);
+    s.numParticles = preset.numParticles;
+    s.forceFactor = preset.forceFactor;
+    this.updateRMax(preset.rMax);
+    s.frictionFactor = Math.pow(0.5, s.timeStep / preset.frictionHalfLife);
+    this.setIs2D(preset.is2D);
+    this.resetParticles();
+  };
 
   updateParticleKinds = (val: number) => {
     this.s.particleKinds = val;
@@ -209,10 +227,14 @@ export class SimulationEngine {
   }
 
   toggle3rdDimension() {
-    console.log("toggling...")
-    this.is2D = !this.is2D;
-    if (!this.is2D) this.set3D();
-    else this.set2D();
+    this.setIs2D(!this.is2D);
+  }
+
+  setIs2D(is2D: boolean): void {
+    if (this.is2D === is2D) return;
+    this.is2D = is2D;
+    if (is2D) this.set2D();
+    else this.set3D();
   }
 
   set2D() {

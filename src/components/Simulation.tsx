@@ -12,6 +12,7 @@ export default function ParticleLifeSimulation() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [is2DUI, setIs2DUI] = useState(false);
+  const [configKey, setConfigKey] = useState(0);
 
   const maxNumParticles = SIM_LIMITS.MAX_PARTICLES;
   const defaultNumParticles = SIM_LIMITS.DEFAULT_PARTICLES;
@@ -186,7 +187,15 @@ export default function ParticleLifeSimulation() {
               scrollbarColor: "#444 transparent",
             }}
           >
-            <ControlPanel state={sim.current} actions={engine.actions} />
+            <ControlPanel
+              state={sim.current}
+              actions={engine.actions}
+              configKey={configKey}
+              onPresetApplied={() => {
+                setIs2DUI(engine.getIs2D());
+                setConfigKey((k) => k + 1);
+              }}
+            />
           </div>
         )}
       </div>

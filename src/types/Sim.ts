@@ -17,6 +17,8 @@ export type SimState = {
   velocitiesZ: Float32Array;
 };
 
+import type { SimPreset } from "./SimPreset";
+
 export type SimActions = {
   updateTimeStep: (val: number) => void;
   updateParticleKinds: (val: number) => void;
@@ -24,6 +26,8 @@ export type SimActions = {
   updateForceFactor: (val: number) => void;
   updateMaxRadius: (val: number) => void;
   updateFrictionHalfLife: (val: number) => void;
+  exportPreset: () => SimPreset;
+  applyPreset: (preset: SimPreset) => void;
   setRandomVelocities: () => void;
   updateMatrixValueAtCoords: (
     matrix: Float32Array,
