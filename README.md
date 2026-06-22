@@ -1,12 +1,14 @@
-# Particle Life 3D
+# [Particle Life 3D](https://particlelife3d.netlify.app/)
 
-A high-performance 3D particle life simulation built with React and TypeScript. This project simulates emergent behaviors through simple attraction and repulsion rules between different species of particles.
+A high-performance 3D particle life simulation built with React and TypeScript. This project simulates emergent behaviors through simple attraction and repulsion rules between different species of particles. Initial concept from this [video](https://www.youtube.com/watch?v=scvuli-zcRc) by [Tom Mohr](https://www.youtube.com/@tom-mohr)
 
 ## Technical Overview: Spatial Partitioning
 
 To maintain a high frame rate with thousands of particles, the engine utilizes a Uniform Grid Partitioning system.
 
-In a naive simulation, every particle must check the distance to every other particle, resulting in a complexity of O(n²). As particle counts increase, this becomes computationally impossible for CPUs.
+In a naive simulation, every particle must check the distance to every other particle, resulting in a complexity of O(n²). As particle counts increase, this becomes computationally difficult for CPUs.
+The spatial partitioning system doesn't necessarily reduce the complexity to O(n) as the computations within grid cells are still of O(n²). Rather it just drastically reduces n in cases where there is a small rMax and a sparse distribution of particles.
+This results in a dynamic performance where a simulation with many small cells will run better than a simulation with one large cell if both have the same particle counts.
 
 ### How it Works
 
@@ -20,7 +22,7 @@ In a naive simulation, every particle must check the distance to every other par
 
 ## User Interface and Controls
 
-The Control Panel provides real-time manipulation of the simulation physics and environment. It contains a 2d/3d toggle which will snap particles to a plane perpendicular to the z axis when in 2D mode.
+The Control Panel provides real-time manipulation of the simulation physics and environment. It contains a 2D/3D toggle which will snap particles to a plane perpendicular to the z axis when in 2D mode.
 
 ### Simulation Environment
 
